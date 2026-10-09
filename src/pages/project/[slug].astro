@@ -1,0 +1,169 @@
+---
+// Mantém o formato de URL do WordPress: /project/<slug>/
+import type { GetStaticPaths } from 'astro';
+import { getImage, Image } from 'astro:assets';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../../components/CabecalhoPagina.astro';
+import Icon from '../../components/Icon.astro';
+import ProjetoCard from '../../components/ProjetoCard.astro';
+import FormularioOrcamento from '../../components/FormularioOrcamento.astro';
+import { projetosOrdenados } from '../../lib/conteudo';
+import { CATEGORIA_LABEL, formatarData } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const projetos = await getCollection('projetos');
+  return projetos.map((p) => ({ params: { slug: p.id }, props: { projeto: p } }));
+}) satisfies GetStaticPaths;
+
+const { projeto } = Astro.props as { projeto: CollectionEntry<'projetos'> };
+const d = projeto.data;
+const { Content } = await render(projeto);
+
+const SERVICO_DA_CATEGORIA = {
+  'paineis-solares': 'paineis-solares',
+  'carregadores-ve': 'carregadores-carros-eletricos',
+  'instalacoes-eletricas': 'instalacoes-eletricas',
+  baterias: 'baterias-solares',
+} as const;
+
+const imagens = [{ imagem: d.capa, alt: d.capaAlt }, ...d.galeria];
+const ampliadas = await Promise.all(imagens.map((i) => getImage({ src: i.imagem, width: 1600, format: 'webp' })));
+
+const relacionados = (await projetosOrdenados(true))
+  .filter((p) => p.id !== projeto.id && p.data.categoria === d.categoria)
+  .sort((a, b) => Number(b.data.distrito === d.distrito) - Number(a.data.distrito === d.distrito))
+  .slice(0, 3);
+
+const local = [d.localidade, d.concelho !== d.localidade ? d.concelho : undefined, d.distrito].filter(Boolean).join(', ');
+const descricao =
+  d.seo?.descricao ??
+  [`${d.titulo}.`, local && `Local: ${local}.`, d.equipamentos.length && `${d.equipamentos.join(', ')}.`, 'Instalação SS Energy.']
+    .filter(Boolean)
+    .join(' ')
+    .slice(0, 160);
+const trilho = [
+  { nome: 'Projetos', url: '/projetos/' },
+  { nome: CATEGORIA_LABEL[d.categoria], url: `/projetos/${d.categoria}/` },
+  { nome: d.localidade ?? d.titulo, url: `/project/${projeto.id}/` },
+];
+---
+
+<BaseLayout titulo={d.seo?.titulo ?? d.titulo} descricao={descricao} imagem={d.capa} imagemAlt={d.capaAlt} trilho={trilho}>
+  <CabecalhoPagina titulo={d.titulo} eyebrow={CATEGORIA_LABEL[d.categoria]} trilho={trilho} />
+
+  <section class="py-12 sm:py-16">
+    <div class="container-site grid gap-10 lg:grid-cols-5">
+      <div class="lg:col-span-3">
+        <ul class="grid gap-4 sm:grid-cols-2" data-galeria>
+          {
+            imagens.map((img, i) => (
+              <li class:list={[i === 0 && 'sm:col-span-2']}>
+                <a href={ampliadas[i].src} class="block overflow-hidden rounded-2xl bg-cinza-100" data-legenda={img.alt}>
+                  <Image
+                    src={img.imagem}
+                    alt={img.alt}
+                    widths={i === 0 ? [480, 720, 1000] : [360, 520]}
+                    sizes={i === 0 ? '(min-width: 1024px) 700px, 100vw' : '(min-width: 1024px) 340px, 50vw'}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : undefined}
+                    class="aspect-[4/3] w-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="lg:col-span-2">
+        <div class="prosa text-lg"><Content /></div>
+        <dl class="mt-8 divide-y divide-cinza-100 rounded-2xl ring-1 ring-cinza-100">
+          {
+            d.potencia && (
+              <div class="flex items-center justify-between gap-4 p-4">
+                <dt class="flex items-center gap-2 text-sm text-cinza-600"><Icon nome="raio" class="size-4 text-laranja-700" /> Potência</dt>
+                <dd class="font-semibold text-navy-950">{d.potencia}</dd>
+              </div>
+            )
+          }
+          {
+            local && (
+              <div class="flex items-center justify-between gap-4 p-4">
+                <dt class="flex items-center gap-2 text-sm text-cinza-600"><Icon nome="mapa" class="size-4 text-laranja-700" /> Local</dt>
+                <dd class="text-right font-semibold text-navy-950">{local}</dd>
+              </div>
+            )
+          }
+          <div class="flex items-center justify-between gap-4 p-4">
+            <dt class="flex items-center gap-2 text-sm text-cinza-600"><Icon nome="calendario" class="size-4 text-laranja-700" /> Publicado</dt>
+            <dd class="font-semibold text-navy-950"><time datetime={d.data.toISOString()}>{formatarData(d.data)}</time></dd>
+          </div>
+        </dl>
+        {
+          d.equipamentos.length > 0 && (
+            <>
+              <h2 class="mt-8 text-lg">Equipamento e características</h2>
+              <ul class="mt-3 space-y-2">
+                {d.equipamentos.map((e) => (
+                  <li class="flex items-start gap-3">
+                    <Icon nome="check" class="mt-0.5 size-5 shrink-0 text-verde-600" /> {e}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <a href="#orcamento" class="btn-primario">Pedir orçamento</a>
+          <a href="/projetos/" class="btn-contorno"><Icon nome="voltar" class="size-4" /> Voltar aos projetos</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    relacionados.length > 0 && (
+      <section class="bg-cinza-50 py-16" aria-labelledby="relacionados">
+        <div class="container-site">
+          <h2 id="relacionados" class="text-2xl">Outros projetos de {CATEGORIA_LABEL[d.categoria].toLowerCase()}</h2>
+          <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {relacionados.map((p) => <ProjetoCard projeto={p} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="py-16">
+    <div class="container-site max-w-3xl">
+      <FormularioOrcamento servico={SERVICO_DA_CATEGORIA[d.categoria]} titulo="Quer uma instalação como esta?" />
+    </div>
+  </section>
+
+  <dialog class="m-auto max-h-[92vh] max-w-[92vw] overflow-visible bg-transparent p-0 backdrop:bg-navy-950/90" data-lightbox>
+    <form method="dialog">
+      <button class="absolute -top-12 right-0 rounded-full bg-white/10 p-2 text-white hover:bg-white/20" aria-label="Fechar">
+        <Icon nome="fechar" class="size-6" />
+      </button>
+    </form>
+    <img src="" alt="" class="max-h-[85vh] w-auto rounded-xl" />
+  </dialog>
+</BaseLayout>
+
+<script>
+  // Lightbox mínima: sem JS os links abrem a imagem ampliada diretamente.
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  const img = dialog?.querySelector('img');
+  document.querySelector('[data-galeria]')?.addEventListener('click', (ev) => {
+    const a = (ev.target as HTMLElement).closest('a');
+    if (!a || !dialog || !img) return;
+    ev.preventDefault();
+    img.src = a.href;
+    img.alt = a.dataset.legenda ?? '';
+    dialog.showModal();
+  });
+  dialog?.addEventListener('click', (ev) => {
+    if (ev.target === dialog) dialog.close();
+  });
+</script>

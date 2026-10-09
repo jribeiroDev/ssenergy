@@ -1,0 +1,81 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/site/logo.png';
+import Icon from './Icon.astro';
+import { NAV, site, telUrl } from '../lib/site';
+
+const path = Astro.url.pathname;
+const ativo = (href: string) => path.startsWith(href) || (href === '/projetos/' && path.startsWith('/project/'));
+---
+
+<header class="sticky top-0 z-40 bg-navy-950 text-white">
+  <a
+    href="#conteudo"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-navy-950"
+  >
+    Saltar para o conteúdo
+  </a>
+  <div class="container-site flex h-16 items-center justify-between gap-6 lg:h-20">
+    <a href="/" class="shrink-0" aria-label={`${site.nome} — página inicial`}>
+      <Image src={logo} alt={site.nome} width={168} height={48} class="h-10 w-auto lg:h-12" loading="eager" />
+    </a>
+
+    <nav aria-label="Principal" class="hidden lg:block">
+      <ul class="flex items-center gap-1 text-sm font-medium">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={[
+                  'rounded-lg px-3 py-2 transition-colors hover:text-laranja-400',
+                  ativo(item.href) ? 'text-laranja-500' : 'text-white/90',
+                ]}
+                aria-current={ativo(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="hidden items-center gap-4 lg:flex">
+      <a href={telUrl} class="flex items-center gap-2 text-sm text-white/90 hover:text-white">
+        <Icon nome="telefone" class="size-4 text-laranja-500" />
+        {site.telefoneVisivel}
+      </a>
+      <a href="/contactos/" class="btn-primario">Pedir orçamento</a>
+    </div>
+
+    <!-- Menu móvel sem JavaScript -->
+    <details class="group lg:hidden">
+      <summary
+        class="flex size-11 cursor-pointer list-none items-center justify-center rounded-lg hover:bg-white/10 [&::-webkit-details-marker]:hidden"
+        aria-label="Menu"
+      >
+        <Icon nome="menu" class="size-6 group-open:hidden" />
+        <Icon nome="fechar" class="hidden size-6 group-open:block" />
+      </summary>
+      <nav aria-label="Principal (móvel)" class="absolute inset-x-0 top-16 border-t border-white/10 bg-navy-950 pb-6 shadow-2xl">
+        <ul class="container-site flex flex-col py-2 text-base font-medium">
+          <li><a href="/" class="block border-b border-white/10 py-3">Início</a></li>
+          {
+            NAV.map((item) => (
+              <li>
+                <a href={item.href} class:list={['block border-b border-white/10 py-3', ativo(item.href) && 'text-laranja-500']}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="container-site mt-2 flex flex-col gap-3">
+          <a href="/contactos/" class="btn-primario">Pedir orçamento gratuito</a>
+          <a href={telUrl} class="btn-secundario"><Icon nome="telefone" class="size-4" /> {site.telefoneVisivel}</a>
+        </div>
+      </nav>
+    </details>
+  </div>
+</header>

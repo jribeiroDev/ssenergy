@@ -1,0 +1,148 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../../components/CabecalhoPagina.astro';
+import Icon from '../../components/Icon.astro';
+import ProjetoCard from '../../components/ProjetoCard.astro';
+import Faq from '../../components/Faq.astro';
+import FormularioOrcamento from '../../components/FormularioOrcamento.astro';
+import ServicoCard from '../../components/ServicoCard.astro';
+import { projetosOrdenados, servicosOrdenados } from '../../lib/conteudo';
+import { faqPage, servico as servicoLd } from '../../lib/schema';
+import { CATEGORIA_LABEL } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const servicos = await getCollection('servicos');
+  return servicos.map((s) => ({ params: { slug: s.id }, props: { servico: s } }));
+}) satisfies GetStaticPaths;
+
+const { servico } = Astro.props as { servico: CollectionEntry<'servicos'> };
+const d = servico.data;
+const { Content } = await render(servico);
+
+const projetos = d.categoriaProjetos
+  ? (await projetosOrdenados(true)).filter((p) => p.data.categoria === d.categoriaProjetos).slice(0, 6)
+  : [];
+const outros = (await servicosOrdenados()).filter((s) => s.id !== servico.id).slice(0, 3);
+const url = `/servicos/${servico.id}/`;
+const trilho = [
+  { nome: 'Serviços', url: '/servicos/' },
+  { nome: d.tituloCurto, url },
+];
+---
+
+<BaseLayout
+  titulo={d.seo?.titulo ?? d.titulo}
+  descricao={d.seo?.descricao ?? d.resumo}
+  imagem={d.imagem}
+  imagemAlt={d.imagemAlt}
+  trilho={trilho}
+  schema={[servicoLd({ nome: d.titulo, descricao: d.resumo, url }), ...(d.faq.length ? [faqPage(d.faq)] : [])]}
+>
+  <CabecalhoPagina titulo={d.titulo} subtitulo={d.resumo} eyebrow="Serviço" trilho={trilho}>
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <a href="#orcamento" class="btn-primario px-7 py-4 text-base">Pedir orçamento gratuito <Icon nome="seta" class="size-5" /></a>
+    </div>
+  </CabecalhoPagina>
+
+  <section class="py-16 sm:py-20">
+    <div class="container-site grid gap-12 lg:grid-cols-3">
+      <div class="prosa lg:col-span-2">
+        <Content />
+      </div>
+      {
+        d.imagem && (
+          <aside>
+            <Image
+              src={d.imagem}
+              alt={d.imagemAlt ?? ''}
+              widths={[360, 540, 720]}
+              sizes="(min-width: 1024px) 400px, 100vw"
+              class="sticky top-28 aspect-[3/4] w-full rounded-3xl object-cover shadow-lg"
+            />
+          </aside>
+        )
+      }
+    </div>
+  </section>
+
+  {
+    d.beneficios.length > 0 && (
+      <section class="bg-cinza-50 py-16 sm:py-20" aria-labelledby="vantagens">
+        <div class="container-site">
+          <p class="eyebrow">Vantagens</p>
+          <h2 id="vantagens" class="titulo-secao">Porquê {d.tituloCurto.toLowerCase()} com a SS Energy</h2>
+          <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {d.beneficios.map((b) => (
+              <li class="rounded-2xl bg-white p-6 ring-1 ring-cinza-100">
+                <Icon nome="check" class="size-6 text-verde-600" />
+                <h3 class="mt-3 text-lg">{b.titulo}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-cinza-600">{b.texto}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    d.processo.length > 0 && (
+      <section class="py-16 sm:py-20" aria-labelledby="processo">
+        <div class="container-site">
+          <p class="eyebrow">Como trabalhamos</p>
+          <h2 id="processo" class="titulo-secao">Do pedido à instalação</h2>
+          <ol class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+            {d.processo.map((p, i) => (
+              <li class="relative rounded-2xl border border-cinza-100 p-6">
+                <span class="flex size-10 items-center justify-center rounded-full bg-laranja-500 font-bold text-navy-950">{i + 1}</span>
+                <h3 class="mt-4 text-base">{p.titulo}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-cinza-600">{p.texto}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    projetos.length > 0 && d.categoriaProjetos && (
+      <section class="bg-cinza-50 py-16 sm:py-20" aria-labelledby="obras">
+        <div class="container-site">
+          <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p class="eyebrow">Projetos</p>
+              <h2 id="obras" class="titulo-secao">Instalações realizadas</h2>
+            </div>
+            <a href={`/projetos/${d.categoriaProjetos}/`} class="btn-contorno self-start sm:self-auto">
+              Ver projetos de {CATEGORIA_LABEL[d.categoriaProjetos].toLowerCase()} <Icon nome="seta" class="size-4" />
+            </a>
+          </div>
+          <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {projetos.map((p) => <ProjetoCard projeto={p} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <Faq itens={d.faq} />
+
+  <section class="py-16 sm:py-20">
+    <div class="container-site max-w-3xl">
+      <FormularioOrcamento servico={servico.id} titulo={`Orçamento gratuito: ${d.tituloCurto.toLowerCase()}`} />
+    </div>
+  </section>
+
+  <section class="border-t border-cinza-100 py-16" aria-labelledby="outros">
+    <div class="container-site">
+      <h2 id="outros" class="text-2xl">Outros serviços</h2>
+      <div class="mt-8 grid gap-6 sm:grid-cols-3">
+        {outros.map((s) => <ServicoCard servico={s} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

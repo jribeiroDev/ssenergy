@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../../components/CabecalhoPagina.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
+import { artigosPublicados } from '../../lib/conteudo';
+import { ORG_ID } from '../../lib/schema';
+import { absoluteUrl, formatarData } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const artigos = await artigosPublicados();
+  return artigos.map((a) => ({ params: { slug: a.id }, props: { artigo: a } }));
+}) satisfies GetStaticPaths;
+
+const { artigo } = Astro.props as { artigo: CollectionEntry<'blog'> };
+const d = artigo.data;
+const { Content } = await render(artigo);
+const url = `/blog/${artigo.id}/`;
+const trilho = [
+  { nome: 'Blog', url: '/blog/' },
+  { nome: d.titulo, url },
+];
+---
+
+<BaseLayout
+  titulo={d.seo?.titulo ?? d.titulo}
+  descricao={d.seo?.descricao ?? d.resumo}
+  imagem={d.capa}
+  imagemAlt={d.capaAlt}
+  tipo="article"
+  publicado={d.data}
+  atualizado={d.atualizado}
+  noindex={d.rascunho}
+  trilho={trilho}
+  schema={[
+    {
+      '@type': 'BlogPosting',
+      headline: d.titulo,
+      description: d.resumo,
+      datePublished: d.data.toISOString(),
+      dateModified: (d.atualizado ?? d.data).toISOString(),
+      author: { '@type': 'Organization', name: d.autor },
+      publisher: { '@id': ORG_ID },
+      mainEntityOfPage: absoluteUrl(url),
+      inLanguage: 'pt-PT',
+    },
+  ]}
+>
+  <CabecalhoPagina titulo={d.titulo} subtitulo={d.resumo} trilho={trilho}>
+    <p class="mt-6 text-sm text-white/70">
+      <time datetime={d.data.toISOString()}>{formatarData(d.data)}</time> · {d.autor}
+    </p>
+  </CabecalhoPagina>
+  <article class="py-16">
+    <div class="container-site max-w-3xl">
+      {d.capa && <Image src={d.capa} alt={d.capaAlt ?? ''} widths={[640, 960, 1280]} sizes="(min-width: 800px) 768px, 100vw" class="mb-10 w-full rounded-3xl" loading="eager" />}
+      <div class="prosa text-lg"><Content /></div>
+    </div>
+  </article>
+  <CtaBanner />
+</BaseLayout>

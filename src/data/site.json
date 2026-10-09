@@ -1,0 +1,28 @@
+{
+  "nome": "SS Energy",
+  "nomeLegal": "SSEnergy",
+  "slogan": "Painéis solares, carregadores de carros elétricos e instalações elétricas",
+  "descricao": "Desde 2020, a SS Energy instala painéis solares, baterias, carregadores de carros elétricos e faz instalações elétricas no Norte e Centro de Portugal. Orçamento gratuito.",
+  "fundacao": "2020",
+  "telefone": "+351914476129",
+  "telefoneVisivel": "(+351) 914 476 129",
+  "notaTelefone": "Chamada para rede móvel nacional",
+  "email": "",
+  "whatsapp": "351914476129",
+  "whatsappMensagem": "Olá SS Energy! Gostava de obter mais informações.",
+  "horario": "Segunda a sexta-feira, das 9h às 19h",
+  "horarioAbertura": "09:00",
+  "horarioFecho": "19:00",
+  "morada": {
+    "rua": "",
+    "codigoPostal": "",
+    "localidade": "",
+    "regiao": "",
+    "pais": "PT"
+  },
+  "areaServida": ["Braga", "Porto", "Aveiro", "Viseu", "Vila Real", "Guarda"],
+  "redes": {
+    "facebook": "https://www.facebook.com/ssenergy.pt",
+    "instagram": "https://www.instagram.com/ssenergy.pt/"
+  }
+}

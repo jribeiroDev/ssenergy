@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../../components/CabecalhoPagina.astro';
+import ServicoCard from '../../components/ServicoCard.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
+import { servicosOrdenados } from '../../lib/conteudo';
+import { servico as servicoLd } from '../../lib/schema';
+
+const servicos = await servicosOrdenados();
+const trilho = [{ nome: 'Serviços', url: '/servicos/' }];
+---
+
+<BaseLayout
+  titulo="Serviços — painéis solares, carregadores VE e eletricidade"
+  descricao="Painéis solares, baterias, carregadores para carros elétricos, instalações elétricas, iluminação, domótica e portões automáticos. Orçamento gratuito."
+  trilho={trilho}
+  schema={servicos.map((s) => servicoLd({ nome: s.data.titulo, descricao: s.data.resumo, url: `/servicos/${s.id}/` }))}
+>
+  <CabecalhoPagina
+    titulo="Os nossos serviços"
+    subtitulo="Soluções elétricas completas, com foco em energias renováveis e mobilidade elétrica."
+    trilho={trilho}
+  />
+  <section class="py-16 sm:py-20">
+    <div class="container-site grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {servicos.map((s) => <ServicoCard servico={s} />)}
+    </div>
+  </section>
+  <CtaBanner />
+</BaseLayout>

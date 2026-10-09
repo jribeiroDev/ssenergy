@@ -1,0 +1,75 @@
+---
+// /projetos/ (todos) e /projetos/<categoria>/ — páginas estáticas, filtro por links (sem JS).
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../../components/CabecalhoPagina.astro';
+import ProjetoCard from '../../components/ProjetoCard.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
+import { projetosOrdenados } from '../../lib/conteudo';
+import { CATEGORIA_LABEL, type Categoria } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const projetos = await projetosOrdenados(true);
+  const categorias = [...new Set(projetos.map((p) => p.data.categoria))];
+  return [
+    { params: { categoria: undefined }, props: { categoria: undefined } },
+    ...categorias.map((c) => ({ params: { categoria: c }, props: { categoria: c } })),
+  ];
+}) satisfies GetStaticPaths;
+
+const { categoria } = Astro.props as { categoria?: Categoria };
+const todos = await projetosOrdenados(true);
+const projetos = categoria ? todos.filter((p) => p.data.categoria === categoria) : todos;
+const categorias = [...new Set(todos.map((p) => p.data.categoria))];
+
+const label = categoria ? CATEGORIA_LABEL[categoria] : undefined;
+const titulo = label ? `Projetos de ${label.toLowerCase()}` : 'Projetos e instalações';
+const descricao = label
+  ? `${projetos.length} instalações de ${label.toLowerCase()} realizadas pela SS Energy no Norte e Centro de Portugal. Veja potências, equipamentos e fotografias.`
+  : `Veja ${projetos.length} instalações de painéis solares e carregadores para carros elétricos realizadas pela SS Energy em Braga, Porto, Aveiro e outras zonas.`;
+const trilho = [
+  { nome: 'Projetos', url: '/projetos/' },
+  ...(categoria ? [{ nome: label!, url: `/projetos/${categoria}/` }] : []),
+];
+---
+
+<BaseLayout titulo={titulo} descricao={descricao} trilho={trilho}>
+  <CabecalhoPagina titulo={titulo} subtitulo="Algumas das obras que concluímos para os nossos clientes." trilho={trilho} />
+
+  <section class="py-12 sm:py-16">
+    <div class="container-site">
+      <nav aria-label="Filtrar projetos por categoria">
+        <ul class="flex flex-wrap gap-2">
+          <li>
+            <a
+              href="/projetos/"
+              class:list={['inline-block rounded-full px-4 py-2 text-sm font-medium', !categoria ? 'bg-navy-950 text-white' : 'bg-cinza-100 text-navy-950 hover:bg-cinza-50']}
+              aria-current={!categoria ? 'page' : undefined}
+            >
+              Todos ({todos.length})
+            </a>
+          </li>
+          {
+            categorias.map((c) => (
+              <li>
+                <a
+                  href={`/projetos/${c}/`}
+                  class:list={['inline-block rounded-full px-4 py-2 text-sm font-medium', categoria === c ? 'bg-navy-950 text-white' : 'bg-cinza-100 text-navy-950 hover:bg-cinza-50']}
+                  aria-current={categoria === c ? 'page' : undefined}
+                >
+                  {CATEGORIA_LABEL[c]} ({todos.filter((p) => p.data.categoria === c).length})
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {projetos.map((p) => <ProjetoCard projeto={p} nivel="h2" />)}
+      </div>
+    </div>
+  </section>
+
+  <CtaBanner titulo="Saiba mais sobre os nossos serviços" texto="Não hesite em contactar-nos, o futuro espera por si!" />
+</BaseLayout>

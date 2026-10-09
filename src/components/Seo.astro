@@ -1,0 +1,49 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { site, absoluteUrl } from '../lib/site';
+
+export interface SeoProps {
+  titulo: string;
+  descricao: string;
+  imagem?: ImageMetadata;
+  imagemAlt?: string;
+  tipo?: 'website' | 'article';
+  noindex?: boolean;
+  publicado?: Date;
+  atualizado?: Date;
+  jsonLd?: object;
+}
+
+const { titulo, descricao, imagem, imagemAlt, tipo = 'website', noindex = false, publicado, atualizado, jsonLd } =
+  Astro.props as SeoProps;
+
+const tituloCompleto = titulo.includes(site.nome) ? titulo : `${titulo} | ${site.nome}`;
+const canonical = absoluteUrl(Astro.url.pathname);
+
+const og = imagem
+  ? absoluteUrl((await getImage({ src: imagem, width: 1200, height: 630, fit: 'cover', format: 'jpeg', quality: 80 })).src)
+  : absoluteUrl('/og-default.jpg');
+---
+
+<title>{tituloCompleto}</title>
+<meta name="description" content={descricao} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
+
+<meta property="og:locale" content="pt_PT" />
+<meta property="og:type" content={tipo} />
+<meta property="og:site_name" content={site.nome} />
+<meta property="og:title" content={tituloCompleto} />
+<meta property="og:description" content={descricao} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={og} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imagemAlt ?? site.nome} />
+{publicado && <meta property="article:published_time" content={publicado.toISOString()} />}
+{atualizado && <meta property="article:modified_time" content={atualizado.toISOString()} />}
+<meta property="article:publisher" content={site.redes.facebook} />
+<meta name="twitter:card" content="summary_large_image" />
+
+{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}

@@ -1,0 +1,14 @@
+{
+  "heroTitulo": "A energia que precisa",
+  "heroSubtitulo": "Painéis solares, baterias, carregadores para carros elétricos e instalações elétricas com equipa própria e orçamento gratuito.",
+  "heroCta": "Pedir orçamento gratuito",
+  "heroImagemAlt": "Moradia com painéis solares no telhado, instalados pela SS Energy",
+  "porqueTitulo": "Porquê escolher a SS Energy?",
+  "porque": [
+    { "titulo": "Equipa especializada", "texto": "Técnicos certificados e dedicados, do estudo inicial à ligação final.", "icone": "equipa" },
+    { "titulo": "Produtos de qualidade", "texto": "Trabalhamos com marcas de referência em painéis, inversores, baterias e carregadores.", "icone": "selo" },
+    { "titulo": "Orçamento gratuito", "texto": "Analisamos o seu consumo e enviamos uma proposta sem compromisso.", "icone": "orcamento" },
+    { "titulo": "Soluções personalizadas", "texto": "Cada projeto é dimensionado para a sua casa ou empresa — nem mais, nem menos.", "icone": "ajuste" },
+    { "titulo": "Serviço pós-venda", "texto": "Acompanhamento, manutenção e assistência depois da instalação.", "icone": "suporte" }
+  ]
+}

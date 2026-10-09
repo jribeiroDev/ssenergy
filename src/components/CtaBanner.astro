@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+import { site, telUrl } from '../lib/site';
+
+interface Props {
+  titulo?: string;
+  texto?: string;
+  href?: string;
+}
+
+const {
+  titulo = 'Pronto para poupar energia?',
+  texto = 'Peça o seu orçamento gratuito e sem compromisso. Respondemos rapidamente.',
+  href = '/contactos/',
+} = Astro.props;
+---
+
+<section class="py-16 sm:py-20">
+  <div class="container-site">
+    <div class="relative overflow-hidden rounded-3xl bg-navy-950 px-6 py-12 text-center sm:px-12 sm:py-16">
+      <div class="pointer-events-none absolute -bottom-20 -left-20 size-72 rounded-full bg-verde-400/20 blur-3xl"></div>
+      <div class="pointer-events-none absolute -top-20 -right-20 size-72 rounded-full bg-laranja-500/20 blur-3xl"></div>
+      <h2 class="relative text-3xl text-white sm:text-4xl">{titulo}</h2>
+      <p class="relative mx-auto mt-4 max-w-2xl text-lg text-white/80">{texto}</p>
+      <div class="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <a href={href} class="btn-primario px-7 py-4 text-base">Pedir orçamento gratuito <Icon nome="seta" class="size-5" /></a>
+        <a href={telUrl} class="btn-secundario px-7 py-4 text-base"><Icon nome="telefone" class="size-5" /> {site.telefoneVisivel}</a>
+      </div>
+    </div>
+  </div>
+</section>

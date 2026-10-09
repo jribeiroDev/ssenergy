@@ -1,0 +1,42 @@
+---
+// Cabeçalho das páginas interiores: trilho de navegação + H1 + subtítulo.
+interface Props {
+  titulo: string;
+  subtitulo?: string;
+  eyebrow?: string;
+  trilho?: { nome: string; url: string }[];
+}
+
+const { titulo, subtitulo, eyebrow, trilho = [] } = Astro.props;
+---
+
+<section class="relative overflow-hidden bg-navy-900 text-white">
+  <div class="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-laranja-500/10 blur-3xl"></div>
+  <div class="container-site relative py-12 sm:py-16">
+    {
+      trilho.length > 0 && (
+        <nav aria-label="Trilho de navegação" class="mb-6 text-sm text-white/70">
+          <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <li>
+              <a href="/" class="hover:text-white">Início</a>
+            </li>
+            {trilho.map((t, i) => (
+              <li class="flex items-center gap-2">
+                <span aria-hidden="true">/</span>
+                {i === trilho.length - 1 ? (
+                  <span aria-current="page" class="text-white">{t.nome}</span>
+                ) : (
+                  <a href={t.url} class="hover:text-white">{t.nome}</a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+    {eyebrow && <p class="text-xs font-semibold tracking-widest text-laranja-400 uppercase">{eyebrow}</p>}
+    <h1 class="mt-2 max-w-4xl text-3xl text-white sm:text-5xl">{titulo}</h1>
+    {subtitulo && <p class="mt-4 max-w-3xl text-lg text-white/80">{subtitulo}</p>}
+    <slot />
+  </div>
+</section>

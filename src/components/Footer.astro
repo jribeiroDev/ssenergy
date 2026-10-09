@@ -1,0 +1,111 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import logo from '../assets/site/logo.png';
+import Icon from './Icon.astro';
+import { NAV, site, telUrl, whatsappUrl } from '../lib/site';
+
+const servicos = (await getCollection('servicos')).sort((a, b) => a.data.ordem - b.data.ordem);
+const zonas = (await getCollection('zonas')).sort((a, b) => a.data.nome.localeCompare(b.data.nome, 'pt'));
+const ano = new Date().getFullYear();
+---
+
+<footer class="bg-navy-950 text-white/80">
+  <div class="container-site grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <Image src={logo} alt={site.nome} width={168} height={48} class="h-11 w-auto" />
+      <p class="mt-4 text-sm leading-relaxed">{site.descricao}</p>
+      <div class="mt-5 flex gap-3">
+        <a href={site.redes.facebook} class="rounded-lg bg-white/10 p-2 hover:bg-white/20" rel="noopener" target="_blank">
+          <Icon nome="facebook" class="size-5" titulo="Facebook" />
+        </a>
+        <a href={site.redes.instagram} class="rounded-lg bg-white/10 p-2 hover:bg-white/20" rel="noopener" target="_blank">
+          <Icon nome="instagram" class="size-5" titulo="Instagram" />
+        </a>
+      </div>
+    </div>
+
+    <nav aria-label="Serviços">
+      <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Serviços</h2>
+      <ul class="mt-4 space-y-2 text-sm">
+        {
+          servicos.map((s) => (
+            <li>
+              <a href={`/servicos/${s.id}/`} class="hover:text-laranja-400">
+                {s.data.tituloCurto}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <nav aria-label="Empresa">
+      <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Empresa</h2>
+      <ul class="mt-4 space-y-2 text-sm">
+        {
+          NAV.map((n) => (
+            <li>
+              <a href={n.href} class="hover:text-laranja-400">
+                {n.label}
+              </a>
+            </li>
+          ))
+        }
+        <li><a href="/politica-de-privacidade/" class="hover:text-laranja-400">Política de privacidade</a></li>
+      </ul>
+      {
+        zonas.length > 0 && (
+          <>
+            <h2 class="mt-8 text-sm font-semibold tracking-wider text-white uppercase">Zonas</h2>
+            <ul class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+              {zonas.map((z) => (
+                <li>
+                  <a href={`/zonas/${z.id}/`} class="hover:text-laranja-400">
+                    {z.data.nome}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </nav>
+
+    <div>
+      <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Contactos</h2>
+      <ul class="mt-4 space-y-3 text-sm">
+        <li>
+          <a href={telUrl} class="flex items-start gap-3 hover:text-laranja-400">
+            <Icon nome="telefone" class="mt-0.5 size-4 shrink-0 text-laranja-500" />
+            <span>{site.telefoneVisivel}<br /><span class="text-xs text-white/60">{site.notaTelefone}</span></span>
+          </a>
+        </li>
+        <li>
+          <a href={whatsappUrl()} class="flex items-center gap-3 hover:text-laranja-400" rel="noopener" target="_blank">
+            <Icon nome="whatsapp" class="size-4 shrink-0 text-laranja-500" /> WhatsApp
+          </a>
+        </li>
+        {
+          site.email && (
+            <li>
+              <a href={`mailto:${site.email}`} class="flex items-center gap-3 hover:text-laranja-400">
+                <Icon nome="email" class="size-4 shrink-0 text-laranja-500" /> {site.email}
+              </a>
+            </li>
+          )
+        }
+        <li class="flex items-start gap-3">
+          <Icon nome="relogio" class="mt-0.5 size-4 shrink-0 text-laranja-500" />
+          {site.horario}
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="container-site flex flex-col gap-2 py-6 text-xs text-white/60 sm:flex-row sm:justify-between">
+      <p>© {ano} {site.nome}. Todos os direitos reservados.</p>
+      <p><a href="https://www.livroreclamacoes.pt/" rel="noopener" target="_blank" class="hover:text-white">Livro de Reclamações</a></p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+interface Props {
+  servico: CollectionEntry<'servicos'>;
+}
+
+const { servico } = Astro.props;
+const { tituloCurto, resumo, icone } = servico.data;
+---
+
+<article class="group relative flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-cinza-100 transition hover:-translate-y-0.5 hover:shadow-lg">
+  <span class="flex size-12 items-center justify-center rounded-xl bg-navy-950 text-laranja-500">
+    <Icon nome={icone} class="size-6" />
+  </span>
+  <h3 class="mt-5 text-lg">
+    <a href={`/servicos/${servico.id}/`} class="after:absolute after:inset-0">{tituloCurto}</a>
+  </h3>
+  <p class="mt-2 flex-1 text-sm leading-relaxed text-cinza-600">{resumo}</p>
+  <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-laranja-700">
+    Saber mais <Icon nome="seta" class="size-4 transition-transform group-hover:translate-x-1" />
+  </span>
+</article>

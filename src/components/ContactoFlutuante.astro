@@ -1,0 +1,21 @@
+---
+import Icon from './Icon.astro';
+import { telUrl, whatsappUrl } from '../lib/site';
+---
+
+<div class="fixed right-4 bottom-4 z-30 flex flex-col gap-3 print:hidden">
+  <a
+    href={whatsappUrl()}
+    rel="noopener"
+    target="_blank"
+    class="flex size-14 items-center justify-center rounded-full bg-[#1fa855] text-white shadow-lg transition-transform hover:scale-105"
+  >
+    <Icon nome="whatsapp" class="size-7" titulo="Falar connosco no WhatsApp" />
+  </a>
+  <a
+    href={telUrl}
+    class="flex size-14 items-center justify-center rounded-full bg-laranja-500 text-navy-950 shadow-lg transition-transform hover:scale-105 lg:hidden"
+  >
+    <Icon nome="telefone" class="size-6" titulo="Ligar para a SS Energy" />
+  </a>
+</div>

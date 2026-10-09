@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { NAV } from '../lib/site';
+---
+
+<BaseLayout titulo="Página não encontrada" descricao="A página que procura não existe ou foi movida." noindex>
+  <section class="py-24">
+    <div class="container-site max-w-2xl text-center">
+      <p class="text-6xl font-bold text-laranja-500">404</p>
+      <h1 class="mt-4 text-3xl">Página não encontrada</h1>
+      <p class="mt-4 text-cinza-600">A página que procura não existe ou mudou de endereço. Experimente uma destas:</p>
+      <ul class="mt-8 flex flex-wrap justify-center gap-3">
+        <li><a href="/" class="btn-primario">Início</a></li>
+        {NAV.map((n) => <li><a href={n.href} class="btn-contorno">{n.label}</a></li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

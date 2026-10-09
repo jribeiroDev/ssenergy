@@ -1,0 +1,29 @@
+# Redirecionamentos 301 do site WordPress antigo → site novo (Cloudflare Pages)
+
+# Landing pages antigas dos serviços
+/paineis-solares/                    /servicos/paineis-solares/                 301
+/paineis-solares                     /servicos/paineis-solares/                 301
+/carregadores-de-carros-eletricos/   /servicos/carregadores-carros-eletricos/   301
+/carregadores-de-carros-eletricos    /servicos/carregadores-carros-eletricos/   301
+
+# Slug alterado (underscore → hífen)
+/project/lagoa_trofa/                /project/lagoa-trofa/                      301
+/project/lagoa_trofa                 /project/lagoa-trofa/                      301
+
+# Categorias de projetos do Divi
+/project_category/paineis-solares/   /projetos/paineis-solares/                 301
+/project_category/carregadores-ve/   /projetos/carregadores-ve/                 301
+/project_category/*                  /projetos/                                 301
+
+# Páginas duplicadas/antigas do WordPress
+/inicio/                             /                                          301
+/sobre-nos_old/                      /sobre-nos/                                301
+/projetos_old/                       /projetos/                                 301
+/contactos_old/                      /contactos/                                301
+/ss-energy/                          /                                          301
+/coming-soon-old/                    /                                          301
+/project/                            /projetos/                                 301
+
+# Feeds
+/feed/                               /rss.xml                                   301
+/feed                                /rss.xml                                   301

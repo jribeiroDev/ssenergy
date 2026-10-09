@@ -1,0 +1,35 @@
+---
+// Páginas simples geridas no CMS (sobre-nos, politica-de-privacidade, promo, …)
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../components/CabecalhoPagina.astro';
+import FormularioOrcamento from '../components/FormularioOrcamento.astro';
+import CtaBanner from '../components/CtaBanner.astro';
+
+export const getStaticPaths = (async () => {
+  const paginas = await getCollection('paginas');
+  return paginas.map((p) => ({ params: { pagina: p.id }, props: { pagina: p } }));
+}) satisfies GetStaticPaths;
+
+const { pagina } = Astro.props as { pagina: CollectionEntry<'paginas'> };
+const d = pagina.data;
+const { Content } = await render(pagina);
+const trilho = [{ nome: d.titulo, url: `/${pagina.id}/` }];
+---
+
+<BaseLayout
+  titulo={d.seo?.titulo ?? d.titulo}
+  descricao={d.seo?.descricao ?? d.subtitulo ?? d.titulo}
+  noindex={d.noindex}
+  trilho={trilho}
+>
+  <CabecalhoPagina titulo={d.titulo} subtitulo={d.subtitulo} trilho={trilho} />
+  <section class="py-16">
+    <div class:list={['container-site', d.mostrarFormulario ? 'grid gap-12 lg:grid-cols-2' : 'max-w-3xl']}>
+      <div class="prosa text-lg"><Content /></div>
+      {d.mostrarFormulario && <div><FormularioOrcamento titulo="Escolha o serviço que pretende" /></div>}
+    </div>
+  </section>
+  {!d.mostrarFormulario && <CtaBanner />}
+</BaseLayout>

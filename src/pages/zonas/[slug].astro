@@ -1,0 +1,99 @@
+---
+// Páginas locais (SEO local): texto único por distrito + projetos realizados nessa zona.
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CabecalhoPagina from '../../components/CabecalhoPagina.astro';
+import Icon from '../../components/Icon.astro';
+import ProjetoCard from '../../components/ProjetoCard.astro';
+import ServicoCard from '../../components/ServicoCard.astro';
+import FormularioOrcamento from '../../components/FormularioOrcamento.astro';
+import { projetosOrdenados, servicosOrdenados } from '../../lib/conteudo';
+import { ORG_ID } from '../../lib/schema';
+import { absoluteUrl } from '../../lib/site';
+
+export const getStaticPaths = (async () => {
+  const zonas = await getCollection('zonas');
+  return zonas.map((z) => ({ params: { slug: z.id }, props: { zona: z } }));
+}) satisfies GetStaticPaths;
+
+const { zona } = Astro.props as { zona: CollectionEntry<'zonas'> };
+const d = zona.data;
+const { Content } = await render(zona);
+
+const projetos = (await projetosOrdenados(true)).filter((p) => p.data.distrito === d.distrito);
+const servicos = (await servicosOrdenados()).slice(0, 3);
+const localidades = [...new Set(projetos.map((p) => p.data.localidade).filter(Boolean))];
+const url = `/zonas/${zona.id}/`;
+const trilho = [{ nome: `Zona: ${d.nome}`, url }];
+---
+
+<BaseLayout
+  titulo={d.seo?.titulo ?? d.titulo}
+  descricao={d.seo?.descricao ?? d.resumo}
+  imagem={projetos[0]?.data.capa}
+  trilho={trilho}
+  schema={[
+    {
+      '@type': 'Service',
+      name: d.titulo,
+      description: d.resumo,
+      url: absoluteUrl(url),
+      provider: { '@id': ORG_ID },
+      areaServed: { '@type': 'AdministrativeArea', name: `Distrito de ${d.distrito}` },
+    },
+  ]}
+>
+  <CabecalhoPagina titulo={d.titulo} subtitulo={d.resumo} eyebrow={`Distrito de ${d.distrito}`} trilho={trilho}>
+    <a href="#orcamento" class="btn-primario mt-8 px-7 py-4 text-base">Pedir orçamento em {d.nome} <Icon nome="seta" class="size-5" /></a>
+  </CabecalhoPagina>
+
+  <section class="py-16">
+    <div class="container-site grid gap-12 lg:grid-cols-3">
+      <div class="prosa text-lg lg:col-span-2"><Content /></div>
+      <aside class="rounded-2xl bg-cinza-50 p-6">
+        <h2 class="text-lg">Concelhos onde trabalhamos</h2>
+        <ul class="mt-4 flex flex-wrap gap-2 text-sm">
+          {d.concelhos.map((c) => <li class="rounded-full bg-white px-3 py-1 ring-1 ring-cinza-100">{c}</li>)}
+        </ul>
+        {
+          localidades.length > 0 && (
+            <p class="mt-6 text-sm text-cinza-600">
+              Obras recentes em: <strong class="text-navy-950">{localidades.join(', ')}</strong>.
+            </p>
+          )
+        }
+      </aside>
+    </div>
+  </section>
+
+  {
+    projetos.length > 0 && (
+      <section class="bg-cinza-50 py-16" aria-labelledby="obras-zona">
+        <div class="container-site">
+          <h2 id="obras-zona" class="titulo-secao">
+            {projetos.length} {projetos.length === 1 ? 'instalação' : 'instalações'} no distrito de {d.distrito}
+          </h2>
+          <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {projetos.map((p) => <ProjetoCard projeto={p} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="py-16" aria-labelledby="servicos-zona">
+    <div class="container-site">
+      <h2 id="servicos-zona" class="titulo-secao">Serviços em {d.nome}</h2>
+      <div class="mt-10 grid gap-6 sm:grid-cols-3">
+        {servicos.map((s) => <ServicoCard servico={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="pb-16">
+    <div class="container-site max-w-3xl">
+      <FormularioOrcamento titulo={`Orçamento gratuito em ${d.nome}`} />
+    </div>
+  </section>
+</BaseLayout>

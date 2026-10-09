@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { site, telUrl } from '../lib/site';
+---
+
+<BaseLayout titulo="Pedido enviado" descricao="Recebemos o seu pedido de orçamento." noindex>
+  <section class="py-24">
+    <div class="container-site max-w-2xl text-center">
+      <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-verde-400/20 text-verde-600"><Icon nome="check" class="size-8" /></span>
+      <h1 class="mt-6 text-4xl">Obrigado! Recebemos o seu pedido.</h1>
+      <p class="mt-4 text-lg text-cinza-600">
+        A nossa equipa vai analisar o pedido e entrar em contacto consigo brevemente. Se for urgente, ligue para
+        <a href={telUrl} class="font-semibold text-navy-950 underline">{site.telefoneVisivel}</a>.
+      </p>
+      <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+        <a href="/projetos/" class="btn-primario">Ver projetos</a>
+        <a href="/" class="btn-contorno">Voltar ao início</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

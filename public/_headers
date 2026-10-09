@@ -1,0 +1,20 @@
+# Cloudflare Pages — cabeçalhos HTTP
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; form-action 'self'; base-uri 'self'; frame-ancestors 'self'
+
+# Ficheiros com hash no nome: cache imutável de 1 ano
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/og-default.jpg
+  Cache-Control: public, max-age=604800
+
+# O CMS carrega scripts e imagens externos (GitHub, unpkg) — política própria
+/admin/*
+  ! Content-Security-Policy
+  X-Robots-Tag: noindex

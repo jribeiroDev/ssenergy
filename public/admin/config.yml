@@ -1,0 +1,272 @@
+# Sveltia CMS — https://github.com/sveltia/sveltia-cms
+# Os campos espelham os schemas em src/content.config.ts (o build falha se um conteúdo não for válido).
+#
+# TODO antes de publicar:
+#   - repo: substituir pelo repositório GitHub real (owner/nome)
+#   - base_url: URL do Worker de autenticação OAuth (sveltia-cms-auth) no Cloudflare
+backend:
+  name: github
+  repo: jribeiroDev/ssenergy
+  branch: main
+  base_url: https://sveltia-cms-auth.CONTA.workers.dev
+  commit_messages:
+    create: 'conteúdo: criar {{collection}} “{{slug}}”'
+    update: 'conteúdo: atualizar {{collection}} “{{slug}}”'
+    delete: 'conteúdo: apagar {{collection}} “{{slug}}”'
+    uploadMedia: 'media: carregar “{{path}}”'
+    deleteMedia: 'media: apagar “{{path}}”'
+
+site_url: https://ssenergy.pt
+display_url: https://ssenergy.pt
+logo_url: /favicon.png
+
+# Media global (imagens otimizadas pelo Astro no build)
+media_folder: src/assets/uploads
+public_folder: ../../assets/uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  # ───────────────────────── Projetos ─────────────────────────
+  - name: projetos
+    label: Projetos
+    label_singular: Projeto
+    description: Instalações realizadas. Cada projeto fica em /project/<slug>/.
+    folder: src/content/projetos
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: titulo
+    slug: '{{titulo}}'
+    summary: '{{titulo}} — {{data | date("DD/MM/YYYY")}}'
+    sortable_fields: [data, titulo, categoria]
+    view_filters:
+      - { label: Painéis solares, field: categoria, pattern: paineis-solares }
+      - { label: Carregadores VE, field: categoria, pattern: carregadores-ve }
+      - { label: Destaques, field: destaque, pattern: true }
+    media_folder: /src/assets/projetos
+    public_folder: ../../assets/projetos
+    fields:
+      - { name: titulo, label: Título, widget: string, hint: 'Ex.: Painéis solares em Braga – 3,6 kWp' }
+      - { name: data, label: Data, widget: datetime, time_format: false, format: YYYY-MM-DD }
+      - name: categoria
+        label: Categoria
+        widget: select
+        options:
+          - { label: Painéis solares, value: paineis-solares }
+          - { label: Carregadores VE, value: carregadores-ve }
+          - { label: Instalações elétricas, value: instalacoes-eletricas }
+          - { label: Baterias, value: baterias }
+      - { name: localidade, label: Localidade / freguesia, widget: string, required: false }
+      - { name: concelho, label: Concelho, widget: string, required: false }
+      - name: distrito
+        label: Distrito
+        widget: select
+        required: false
+        options: [Aveiro, Braga, Bragança, Coimbra, Guarda, Porto, Viana do Castelo, Vila Real, Viseu]
+        hint: Os projetos aparecem automaticamente na página da zona com o mesmo distrito.
+      - { name: potencia, label: Potência, widget: string, required: false, hint: 'Ex.: 3,6 kWp (solar) ou 7,4 kW (carregador)' }
+      - { name: equipamentos, label: Equipamentos / características, widget: list, required: false, hint: 'Um por linha. Ex.: 6 Painéis JASolar 550W' }
+      - { name: capa, label: Imagem de capa, widget: image }
+      - { name: capaAlt, label: Descrição da imagem de capa (alt), widget: string, hint: Descreva a fotografia — importante para SEO e acessibilidade. }
+      - name: galeria
+        label: Galeria
+        widget: list
+        required: false
+        fields:
+          - { name: imagem, label: Imagem, widget: image }
+          - { name: alt, label: Descrição (alt), widget: string }
+      - { name: destaque, label: Destacar na página inicial, widget: boolean, default: false }
+      - { name: body, label: Descrição do projeto, widget: markdown }
+      - &seo
+        name: seo
+        label: SEO (opcional)
+        widget: object
+        collapsed: true
+        required: false
+        fields:
+          - { name: titulo, label: Título SEO (máx. 70), widget: string, required: false, pattern: ['^.{0,70}$', 'Máximo 70 caracteres'] }
+          - { name: descricao, label: Meta descrição (máx. 170), widget: text, required: false, pattern: ['^.{0,170}$', 'Máximo 170 caracteres'] }
+
+  # ───────────────────────── Blog ─────────────────────────
+  - name: blog
+    label: Blog
+    label_singular: Artigo
+    folder: src/content/blog
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: titulo
+    slug: '{{titulo}}'
+    summary: '{{titulo}} {{rascunho | ternary("(rascunho)", "")}}'
+    sortable_fields: [data, titulo]
+    media_folder: /src/assets/blog
+    public_folder: ../../assets/blog
+    fields:
+      - { name: titulo, label: Título, widget: string }
+      - { name: data, label: Data de publicação, widget: datetime, time_format: false, format: YYYY-MM-DD }
+      - { name: atualizado, label: Data de atualização, widget: datetime, time_format: false, format: YYYY-MM-DD, required: false }
+      - { name: resumo, label: Resumo, widget: text, hint: 1–2 frases. Aparece na listagem e nos resultados do Google. }
+      - { name: capa, label: Imagem de capa, widget: image, required: false }
+      - { name: capaAlt, label: Descrição da imagem (alt), widget: string, required: false }
+      - { name: autor, label: Autor, widget: string, default: SS Energy }
+      - { name: etiquetas, label: Etiquetas, widget: list, required: false }
+      - { name: rascunho, label: Rascunho (não publicar), widget: boolean, default: true }
+      - { name: body, label: Texto, widget: markdown }
+      - *seo
+
+  # ───────────────────────── Serviços ─────────────────────────
+  - name: servicos
+    label: Serviços
+    label_singular: Serviço
+    folder: src/content/servicos
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: tituloCurto
+    slug: '{{tituloCurto}}'
+    summary: '{{ordem}}. {{tituloCurto}}'
+    sortable_fields: [ordem, tituloCurto]
+    media_folder: /src/assets/site
+    public_folder: ../../assets/site
+    fields:
+      - { name: titulo, label: Título (H1), widget: string }
+      - { name: tituloCurto, label: Nome curto (menus e cartões), widget: string }
+      - { name: ordem, label: Ordem, widget: number, value_type: int, default: 99 }
+      - name: icone
+        label: Ícone
+        widget: select
+        options: [sol, carregador, raio, bateria, casa, lampada, portao]
+      - { name: resumo, label: Resumo, widget: text }
+      - { name: imagem, label: Imagem, widget: image, required: false }
+      - { name: imagemAlt, label: Descrição da imagem (alt), widget: string, required: false }
+      - name: categoriaProjetos
+        label: Mostrar projetos da categoria
+        widget: select
+        required: false
+        options: [paineis-solares, carregadores-ve, instalacoes-eletricas, baterias]
+      - { name: destaqueInicio, label: Destacar na página inicial (com imagem), widget: boolean, default: false }
+      - name: beneficios
+        label: Vantagens
+        widget: list
+        required: false
+        fields:
+          - { name: titulo, label: Título, widget: string }
+          - { name: texto, label: Texto, widget: text }
+      - name: processo
+        label: Passos do processo
+        widget: list
+        required: false
+        fields:
+          - { name: titulo, label: Título, widget: string }
+          - { name: texto, label: Texto, widget: text }
+      - name: faq
+        label: Perguntas frequentes
+        widget: list
+        required: false
+        summary: '{{fields.pergunta}}'
+        fields:
+          - { name: pergunta, label: Pergunta, widget: string }
+          - { name: resposta, label: Resposta, widget: text }
+      - { name: body, label: Texto principal, widget: markdown }
+      - *seo
+
+  # ───────────────────────── Zonas (SEO local) ─────────────────────────
+  - name: zonas
+    label: Zonas
+    label_singular: Zona
+    description: Páginas locais por distrito (/zonas/<slug>/). Os projetos com o mesmo distrito aparecem automaticamente.
+    folder: src/content/zonas
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: nome
+    slug: '{{nome}}'
+    fields:
+      - { name: nome, label: Nome, widget: string }
+      - { name: distrito, label: Distrito, widget: string }
+      - { name: concelhos, label: Concelhos, widget: list }
+      - { name: titulo, label: Título (H1), widget: string }
+      - { name: resumo, label: Resumo, widget: text }
+      - { name: body, label: Texto (único para esta zona — não copiar de outras), widget: markdown }
+      - *seo
+
+  # ───────────────────────── Páginas ─────────────────────────
+  - name: paginas
+    label: Páginas
+    label_singular: Página
+    description: Páginas simples (Sobre nós, Política de privacidade, campanhas). URL = /<slug>/
+    folder: src/content/paginas
+    extension: md
+    format: frontmatter
+    create: true
+    identifier_field: titulo
+    slug: '{{titulo}}'
+    fields:
+      - { name: titulo, label: Título, widget: string }
+      - { name: subtitulo, label: Subtítulo, widget: string, required: false }
+      - { name: mostrarFormulario, label: Mostrar formulário de orçamento, widget: boolean, default: false }
+      - { name: noindex, label: Esconder dos motores de busca, widget: boolean, default: false }
+      - { name: body, label: Conteúdo, widget: markdown }
+      - *seo
+
+  # ───────────────────────── Definições ─────────────────────────
+  - name: definicoes
+    label: Definições
+    editor:
+      preview: false
+    files:
+      - name: site
+        label: Contactos e empresa
+        file: src/data/site.json
+        format: json
+        fields:
+          - { name: nome, label: Nome, widget: string }
+          - { name: nomeLegal, label: Nome legal, widget: string }
+          - { name: slogan, label: Slogan, widget: string }
+          - { name: descricao, label: Descrição (SEO e rodapé), widget: text }
+          - { name: fundacao, label: Ano de fundação, widget: string }
+          - { name: telefone, label: Telefone (formato +351…), widget: string }
+          - { name: telefoneVisivel, label: Telefone (como aparece no site), widget: string }
+          - { name: notaTelefone, label: Nota do telefone, widget: string }
+          - { name: email, label: Email, widget: string, required: false }
+          - { name: whatsapp, label: WhatsApp (só dígitos, com 351), widget: string }
+          - { name: whatsappMensagem, label: Mensagem inicial do WhatsApp, widget: string }
+          - { name: horario, label: Horário (texto), widget: string }
+          - { name: horarioAbertura, label: Abre às (HH:MM), widget: string }
+          - { name: horarioFecho, label: Fecha às (HH:MM), widget: string }
+          - name: morada
+            label: Morada
+            widget: object
+            fields:
+              - { name: rua, label: Rua, widget: string, required: false }
+              - { name: codigoPostal, label: Código postal, widget: string, required: false }
+              - { name: localidade, label: Localidade, widget: string, required: false }
+              - { name: regiao, label: Distrito, widget: string, required: false }
+              - { name: pais, label: País, widget: string, default: PT }
+          - { name: areaServida, label: Área servida (distritos), widget: list }
+          - name: redes
+            label: Redes sociais
+            widget: object
+            fields:
+              - { name: facebook, label: Facebook, widget: string }
+              - { name: instagram, label: Instagram, widget: string }
+      - name: inicio
+        label: Página inicial
+        file: src/data/inicio.json
+        format: json
+        fields:
+          - { name: heroTitulo, label: Título principal, widget: string }
+          - { name: heroSubtitulo, label: Subtítulo, widget: text }
+          - { name: heroCta, label: Texto do botão, widget: string }
+          - { name: heroImagemAlt, label: Descrição da imagem principal, widget: string }
+          - { name: porqueTitulo, label: Título “Porquê escolher”, widget: string }
+          - name: porque
+            label: Razões
+            widget: list
+            fields:
+              - { name: titulo, label: Título, widget: string }
+              - { name: texto, label: Texto, widget: text }
+              - { name: icone, label: Ícone, widget: select, options: [equipa, selo, orcamento, ajuste, suporte] }

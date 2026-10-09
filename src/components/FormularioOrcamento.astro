@@ -1,0 +1,191 @@
+---
+// Formulário de orçamento. Funciona sem JS (POST → /obrigado/); com JS envia por fetch.
+// Campos específicos de painéis solares / carregadores aparecem via CSS :has() conforme o serviço escolhido.
+import Icon from './Icon.astro';
+
+interface Props {
+  servico?: string;
+  titulo?: string;
+  id?: string;
+}
+
+const { servico = '', titulo = 'Peça o seu orçamento gratuito', id = 'orcamento' } = Astro.props;
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+
+const SERVICOS = [
+  ['paineis-solares', 'Painéis solares'],
+  ['baterias-solares', 'Baterias solares'],
+  ['carregadores-carros-eletricos', 'Carregador para carro elétrico'],
+  ['instalacoes-eletricas', 'Instalação / manutenção elétrica'],
+  ['domotica', 'Domótica'],
+  ['iluminacao', 'Iluminação'],
+  ['portoes-automaticos', 'Portões automáticos'],
+  ['outro', 'Outro'],
+];
+---
+
+<section id={id} class="scroll-mt-24 rounded-3xl bg-white p-6 shadow-xl ring-1 ring-cinza-100 sm:p-8">
+  <h2 class="text-2xl">{titulo}</h2>
+  <p class="mt-2 text-sm text-cinza-600">Preencha o formulário e entraremos em contacto consigo o mais rapidamente possível.</p>
+
+  <form class="form-orcamento mt-6 grid gap-4 sm:grid-cols-2" action="/api/contacto" method="post" data-orcamento>
+    <div class="sm:col-span-2">
+      <label for={`${id}-servico`} class="rotulo">Tipo de serviço *</label>
+      <select id={`${id}-servico`} name="servico" required class="campo">
+        <option value="" disabled selected={!servico}>Escolha um serviço</option>
+        {SERVICOS.map(([v, l]) => <option value={v} selected={v === servico}>{l}</option>)}
+      </select>
+    </div>
+    <div>
+      <label for={`${id}-nome`} class="rotulo">Nome *</label>
+      <input id={`${id}-nome`} name="nome" required autocomplete="name" class="campo" maxlength="120" />
+    </div>
+    <div>
+      <label for={`${id}-telefone`} class="rotulo">Telefone *</label>
+      <input id={`${id}-telefone`} name="telefone" type="tel" required autocomplete="tel" class="campo" maxlength="30" />
+    </div>
+    <div>
+      <label for={`${id}-email`} class="rotulo">Email *</label>
+      <input id={`${id}-email`} name="email" type="email" required autocomplete="email" class="campo" maxlength="160" />
+    </div>
+    <div>
+      <label for={`${id}-localidade`} class="rotulo">Localidade *</label>
+      <input id={`${id}-localidade`} name="localidade" required autocomplete="address-level2" class="campo" maxlength="120" />
+    </div>
+
+    <fieldset class="extra extra-solar gap-4 sm:col-span-2 sm:grid-cols-2">
+      <legend class="mb-2 text-sm font-semibold text-navy-950 sm:col-span-2">Sobre a sua instalação solar</legend>
+      <div>
+        <label for={`${id}-fatura`} class="rotulo">Valor médio da fatura de eletricidade</label>
+        <select id={`${id}-fatura`} name="fatura" class="campo">
+          <option value="">—</option>
+          <option>Até 50 €</option>
+          <option>50 € – 100 €</option>
+          <option>100 € – 200 €</option>
+          <option>Mais de 200 €</option>
+        </select>
+      </div>
+      <div>
+        <label for={`${id}-edificio`} class="rotulo">Tipo de edifício</label>
+        <select id={`${id}-edificio`} name="edificio" class="campo">
+          <option value="">—</option><option>Habitação</option><option>Empresa</option>
+        </select>
+      </div>
+      <div>
+        <label for={`${id}-telhado`} class="rotulo">Tipo de telhado</label>
+        <select id={`${id}-telhado`} name="telhado" class="campo">
+          <option value="">—</option><option>Telha</option><option>Plano</option><option>Chapa</option>
+        </select>
+      </div>
+      <div>
+        <label for={`${id}-rede`} class="rotulo">Instalação elétrica</label>
+        <select id={`${id}-rede`} name="rede" class="campo">
+          <option value="">—</option><option>Monofásica</option><option>Trifásica</option><option>Não sei</option>
+        </select>
+      </div>
+      <div class="sm:col-span-2">
+        <span class="rotulo">Pretende bateria (armazenamento)?</span>
+        <div class="mt-2 flex gap-6 text-sm">
+          <label class="flex items-center gap-2"><input type="radio" name="bateria" value="Sim" class="accent-laranja-500" /> Sim</label>
+          <label class="flex items-center gap-2"><input type="radio" name="bateria" value="Não" class="accent-laranja-500" /> Não</label>
+          <label class="flex items-center gap-2"><input type="radio" name="bateria" value="Talvez" class="accent-laranja-500" /> Não sei</label>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="extra extra-ve gap-4 sm:col-span-2 sm:grid-cols-2">
+      <legend class="mb-2 text-sm font-semibold text-navy-950 sm:col-span-2">Sobre o carregamento</legend>
+      <div>
+        <label for={`${id}-local`} class="rotulo">Local de carregamento</label>
+        <select id={`${id}-local`} name="localCarregamento" class="campo">
+          <option value="">—</option><option>Garagem privada</option><option>Garagem partilhada (condomínio)</option><option>Empresa</option><option>Exterior / via pública</option>
+        </select>
+      </div>
+      <div>
+        <label for={`${id}-rede-ve`} class="rotulo">Instalação elétrica</label>
+        <select id={`${id}-rede-ve`} name="redeVe" class="campo">
+          <option value="">—</option><option>Monofásica</option><option>Trifásica</option><option>Não sei</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <div class="sm:col-span-2">
+      <label for={`${id}-mensagem`} class="rotulo">Mensagem</label>
+      <textarea id={`${id}-mensagem`} name="mensagem" rows="4" class="campo" maxlength="3000" placeholder="Conte-nos o que precisa"></textarea>
+    </div>
+
+    <!-- Honeypot anti-spam: invisível para pessoas -->
+    <div class="hidden" aria-hidden="true">
+      <label>Não preencher <input name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+
+    <label class="flex items-start gap-3 text-sm text-cinza-600 sm:col-span-2">
+      <input type="checkbox" name="consentimento" value="sim" required class="mt-1 accent-laranja-500" />
+      <span>Aceito que a SS Energy use estes dados para responder ao meu pedido, de acordo com a <a href="/politica-de-privacidade/" class="underline">política de privacidade</a>. *</span>
+    </label>
+
+    {siteKey && <div class="cf-turnstile sm:col-span-2" data-sitekey={siteKey} data-language="pt-PT" data-appearance="interaction-only"></div>}
+
+    <div class="sm:col-span-2">
+      <button type="submit" class="btn-primario w-full py-4 text-base sm:w-auto sm:px-10">
+        Enviar pedido <Icon nome="seta" class="size-5" />
+      </button>
+      <p class="estado mt-4 hidden rounded-lg p-4 text-sm" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</section>
+
+<style>
+  .extra {
+    display: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .form-orcamento:has(option[value='paineis-solares']:checked, option[value='baterias-solares']:checked) .extra-solar,
+  .form-orcamento:has(option[value='carregadores-carros-eletricos']:checked) .extra-ve {
+    display: grid;
+  }
+</style>
+
+<script>
+  // Carrega o Turnstile só quando o utilizador interage com o formulário (não pesa no carregamento da página).
+  let turnstileCarregado = false;
+  const carregarTurnstile = () => {
+    if (turnstileCarregado || !document.querySelector('.cf-turnstile')) return;
+    turnstileCarregado = true;
+    const s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    s.async = true;
+    document.head.append(s);
+  };
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('form[data-orcamento]')) {
+    form.addEventListener('focusin', carregarTurnstile, { once: true });
+    form.addEventListener('pointerenter', carregarTurnstile, { once: true });
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const estado = form.querySelector<HTMLElement>('.estado')!;
+      const botao = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+      botao.disabled = true;
+      estado.className = 'estado mt-4 rounded-lg bg-cinza-50 p-4 text-sm';
+      estado.textContent = 'A enviar…';
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        const dados = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(dados.erro || 'Não foi possível enviar o pedido.');
+        window.location.href = '/obrigado/';
+      } catch (e) {
+        estado.className = 'estado mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-800';
+        estado.textContent = `${(e as Error).message} Tente novamente ou contacte-nos por telefone/WhatsApp.`;
+        botao.disabled = false;
+        (window as any).turnstile?.reset?.();
+      }
+    });
+  }
+</script>

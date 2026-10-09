@@ -1,0 +1,202 @@
+---
+import { Image, Picture } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import ProjetoCard from '../components/ProjetoCard.astro';
+import ServicoCard from '../components/ServicoCard.astro';
+import FormularioOrcamento from '../components/FormularioOrcamento.astro';
+import { inicio, site, telUrl, whatsappUrl } from '../lib/site';
+import { projetosOrdenados, servicosOrdenados } from '../lib/conteudo';
+import hero from '../assets/site/hero.jpg';
+
+const servicos = await servicosOrdenados();
+const principais = servicos.filter((s) => s.data.destaqueInicio && s.data.imagem);
+const outros = servicos.filter((s) => !principais.includes(s));
+const projetos = await projetosOrdenados(true);
+const zonas = await getCollection('zonas');
+
+const ICONES_PORQUE = {
+  equipa: 'equipa',
+  selo: 'selo',
+  orcamento: 'orcamento',
+  ajuste: 'ajuste',
+  suporte: 'suporte',
+} as const;
+---
+
+<BaseLayout
+  titulo="SS Energy | Painéis solares, carregadores VE e instalações elétricas"
+  descricao={site.descricao}
+  imagem={hero}
+  imagemAlt={inicio.heroImagemAlt}
+>
+  <!-- Hero -->
+  <section class="relative isolate overflow-hidden bg-navy-950 text-white">
+    <Picture
+      src={hero}
+      alt={inicio.heroImagemAlt}
+      formats={['avif', 'webp']}
+      widths={[480, 768, 1080]}
+      quality={50}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="absolute inset-0 -z-10 size-full object-cover"
+      pictureAttributes={{ class: 'contents' }}
+    />
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-navy-950 via-navy-950/85 to-navy-950/30"></div>
+    <div class="container-site py-20 sm:py-28 lg:py-36">
+      <p class="text-sm font-semibold tracking-widest text-verde-400 uppercase">Energia solar · Mobilidade elétrica · Eletricidade</p>
+      <h1 class="mt-4 max-w-3xl text-5xl leading-[1.05] text-laranja-500 uppercase sm:text-7xl">{inicio.heroTitulo}</h1>
+      <p class="mt-6 max-w-xl text-lg text-white/85">{inicio.heroSubtitulo}</p>
+      <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+        <a href="#orcamento" class="btn-primario px-7 py-4 text-base">{inicio.heroCta} <Icon nome="seta" class="size-5" /></a>
+        <a href={whatsappUrl()} rel="noopener" target="_blank" class="btn-secundario px-7 py-4 text-base">
+          <Icon nome="whatsapp" class="size-5" /> Falar no WhatsApp
+        </a>
+      </div>
+      <dl class="mt-14 grid max-w-2xl grid-cols-3 gap-6 border-t border-white/15 pt-8">
+        <div>
+          <dt class="text-xs text-white/70 sm:text-sm">Instalações publicadas</dt>
+          <dd class="order-first text-3xl font-bold text-white sm:text-4xl">{projetos.length}+</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-white/70 sm:text-sm">No mercado desde</dt>
+          <dd class="order-first text-3xl font-bold text-white sm:text-4xl">{site.fundacao}</dd>
+        </div>
+        <div>
+          <dt class="text-xs text-white/70 sm:text-sm">Orçamento</dt>
+          <dd class="order-first text-3xl font-bold text-white sm:text-4xl">Grátis</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Porquê escolher -->
+  <section class="py-16 sm:py-24" aria-labelledby="porque">
+    <div class="container-site">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="eyebrow">A nossa diferença</p>
+        <h2 id="porque" class="titulo-secao">{inicio.porqueTitulo}</h2>
+      </div>
+      <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        {
+          inicio.porque.map((p) => (
+            <li class="rounded-2xl bg-cinza-50 p-6 text-center">
+              <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white text-laranja-700 shadow-sm">
+                <Icon nome={ICONES_PORQUE[p.icone as keyof typeof ICONES_PORQUE] ?? 'check'} class="size-7" />
+              </span>
+              <h3 class="mt-4 text-base">{p.titulo}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-cinza-600">{p.texto}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Serviços -->
+  <section class="bg-cinza-50 py-16 sm:py-24" aria-labelledby="servicos">
+    <div class="container-site">
+      <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p class="eyebrow">O que fazemos</p>
+          <h2 id="servicos" class="titulo-secao">Serviços</h2>
+        </div>
+        <a href="/servicos/" class="btn-contorno self-start sm:self-auto">Todos os serviços <Icon nome="seta" class="size-4" /></a>
+      </div>
+      <div class="mt-10 grid gap-6 lg:grid-cols-3">
+        {
+          principais.map((s) => (
+            <article class="group relative overflow-hidden rounded-3xl bg-navy-950">
+              <Image
+                src={s.data.imagem!}
+                alt={s.data.imagemAlt ?? ''}
+                widths={[360, 540, 720]}
+                sizes="(min-width: 1024px) 400px, 100vw"
+                class="aspect-[4/5] w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-60"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/40 to-transparent" />
+              <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+                <Icon nome={s.data.icone} class="size-8 text-laranja-500" />
+                <h3 class="mt-3 text-2xl text-white">
+                  <a href={`/servicos/${s.id}/`} class="after:absolute after:inset-0">
+                    {s.data.tituloCurto}
+                  </a>
+                </h3>
+                <p class="mt-2 text-sm text-white/80">{s.data.resumo}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+      <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {outros.map((s) => <ServicoCard servico={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Projetos -->
+  <section class="py-16 sm:py-24" aria-labelledby="projetos">
+    <div class="container-site">
+      <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p class="eyebrow">Obra feita</p>
+          <h2 id="projetos" class="titulo-secao">As nossas instalações</h2>
+        </div>
+        <a href="/projetos/" class="btn-contorno self-start sm:self-auto">Ver todos os projetos <Icon nome="seta" class="size-4" /></a>
+      </div>
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {projetos.slice(0, 6).map((p) => <ProjetoCard projeto={p} />)}
+      </div>
+      {
+        zonas.length > 0 && (
+          <p class="mt-10 text-center text-sm text-cinza-600">
+            Trabalhamos em todo o Norte e Centro, sobretudo nos distritos de{' '}
+            {zonas.map((z, i) => (
+              <>
+                <a href={`/zonas/${z.id}/`} class="font-semibold text-navy-950 underline underline-offset-2 hover:text-laranja-700">
+                  {z.data.nome}
+                </a>
+                {i < zonas.length - 2 ? ', ' : i === zonas.length - 2 ? ' e ' : '.'}
+              </>
+            ))}
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="bg-navy-950 py-16 sm:py-24" aria-labelledby="contacte">
+    <div class="container-site grid gap-12 lg:grid-cols-5">
+      <div class="text-white lg:col-span-2">
+        <p class="text-xs font-semibold tracking-widest text-laranja-400 uppercase">Fale connosco</p>
+        <h2 id="contacte" class="mt-2 text-3xl text-white sm:text-4xl">Contacte-nos</h2>
+        <p class="mt-4 text-white/80">Não hesite em contactar-nos — o futuro espera por si! Respondemos a todos os pedidos de orçamento o mais rapidamente possível.</p>
+        <ul class="mt-8 space-y-5">
+          <li>
+            <a href={telUrl} class="flex items-center gap-4 text-lg font-semibold hover:text-laranja-400">
+              <span class="flex size-11 items-center justify-center rounded-xl bg-white/10 text-laranja-500"><Icon nome="telefone" class="size-5" /></span>
+              <span>{site.telefoneVisivel}<span class="block text-xs font-normal text-white/60">{site.notaTelefone}</span></span>
+            </a>
+          </li>
+          <li>
+            <a href={whatsappUrl()} rel="noopener" target="_blank" class="flex items-center gap-4 text-lg font-semibold hover:text-laranja-400">
+              <span class="flex size-11 items-center justify-center rounded-xl bg-white/10 text-laranja-500"><Icon nome="whatsapp" class="size-5" /></span>
+              WhatsApp
+            </a>
+          </li>
+          <li class="flex items-center gap-4 text-white/80">
+            <span class="flex size-11 items-center justify-center rounded-xl bg-white/10 text-laranja-500"><Icon nome="relogio" class="size-5" /></span>
+            {site.horario}
+          </li>
+        </ul>
+      </div>
+      <div class="lg:col-span-3">
+        <FormularioOrcamento />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
