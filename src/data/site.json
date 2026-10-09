@@ -17,10 +17,11 @@
     "rua": "Rua dos Tanques nº 125",
     "codigoPostal": "4595-351",
     "localidade": "Eiriz",
-    "regiao": "Paços de Ferreira",
+    "regiao": "Porto",
     "pais": "PT"
   },
   "areaServida": ["Braga", "Porto", "Aveiro", "Viseu", "Vila Real", "Guarda"],
+  "turnstileSiteKey": "",
   "redes": {
     "facebook": "https://www.facebook.com/ssenergy.pt",
     "instagram": "https://www.instagram.com/ssenergy.pt/"

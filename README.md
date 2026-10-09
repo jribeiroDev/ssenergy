@@ -15,8 +15,8 @@ Site estático da [SS Energy](https://ssenergy.pt) feito com **Astro** e **Tailw
 | `npm run dev` | Servidor de desenvolvimento em `localhost:4321` |
 | `npm run build` | Gera o site em `dist/` |
 | `npm run preview` | Serve o `dist/` |
-| `npm run cf:dev` | Corre o Worker em `localhost:8787` (como em produção: `_redirects`, `_headers` e formulário) |
-| `npm run deploy` | Build + `wrangler deploy` manual (normalmente é feito pelo Cloudflare a cada push) |
+| `npm run cf:dev` | Build + Worker em `localhost:8787`, como em produção (`_redirects`, `_headers`, formulário) |
+| `npm run deploy` | Build + publicação manual (normalmente é o Cloudflare que publica a cada push) |
 | `npm run check` | Verificação de tipos |
 | `node scripts/verificar-redirects.mjs [base]` | Confirma que todos os URLs antigos respondem 200/301 |
 | `npm run migrate:wp` | (Uma vez) importa projetos e imagens do WordPress |
@@ -89,14 +89,18 @@ Boas práticas:
 
 ## Deploy (Cloudflare Workers)
 
-O site é um Worker com *static assets*: o `dist/` é servido diretamente pela CDN e só `/api/*` executa código
-([`worker/index.ts`](worker/index.ts)). A configuração está em [`wrangler.jsonc`](wrangler.jsonc).
+O site é um Worker com *static assets* ([`wrangler.jsonc`](wrangler.jsonc)). Imagens, CSS, JS e fontes (`/_astro/*`) são
+servidos diretamente pela CDN; as páginas e `/api/*` passam por [`worker/index.ts`](worker/index.ts), que:
 
-1. **Workers & Pages → `ssenergy` → Settings → Build** (Git ligado ao repositório):
-   - Build command: `npm run build`
-   - Deploy command: `npx wrangler deploy`
-   - Build variables: `NODE_VERSION=22`, `PUBLIC_TURNSTILE_SITE_KEY=<chave pública>` (e opcional `PUBLIC_CF_ANALYTICS_TOKEN`)
-2. **Settings → Variables and Secrets** (tipo *Secret*):
+- redireciona `www.ssenergy.pt` e `http://` para `https://ssenergy.pt` (301);
+- acrescenta `noindex` no endereço técnico `*.workers.dev` (continua a funcionar para testes);
+- trata o formulário (`POST /api/contacto`).
+
+O `wrangler deploy` corre o `npm run build` sozinho (`build.command`) e o Node vem de `.node-version`. Tudo o que não é
+secreto está versionado no repositório. **No painel só é preciso:**
+
+1. **Worker `ssenergy` → Settings → Build**: *Build command* vazio, *Deploy command* `npx wrangler deploy`.
+2. **Settings → Variables and Secrets** → tipo **Secret**:
 
    | Nome | Valor |
    |---|---|
@@ -104,37 +108,46 @@ O site é um Worker com *static assets*: o `dist/` é servido diretamente pela C
    | `TURNSTILE_SECRET` | chave secreta do Turnstile |
 
    As restantes (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `CONTACT_TO`, `CONTACT_FROM_NAME`) estão em `wrangler.jsonc` → `vars`.
-   Não as criar no painel como texto: o `wrangler deploy` substitui-as pelas do ficheiro.
-3. **Turnstile** (painel → Turnstile → Add widget, modo *Managed*): hostnames `ssenergy.jrapp.workers.dev`, `ssenergy.pt` e `www.ssenergy.pt`.
-4. **Testar o email em local**: copiar `.dev.vars.example` para `.dev.vars` (não vai para o Git), preencher `SMTP_PASS`,
-   `npm run build && npm run cf:dev` e enviar o formulário em `http://localhost:8787/contactos/`.
-   Se a Amen recusar o login vindo da Cloudflare, pedir-lhes que permitam SMTP autenticado a partir de IPs externos.
-5. Depois do deploy: `node scripts/verificar-redirects.mjs https://ssenergy.jrapp.workers.dev` e um envio real do formulário.
+   Não as criar no painel: o `wrangler deploy` substitui-as pelas do ficheiro.
+3. **Turnstile** (uma vez): painel → Turnstile → *Add widget*, modo *Managed*, hostnames `ssenergy.pt`, `www.ssenergy.pt`
+   e `ssenergy.jrapp.workers.dev`. A **chave pública** vai para `src/data/site.json` → `turnstileSiteKey`; a **secreta** para o secret acima.
+
+Sem os dois secrets o formulário responde "temporariamente indisponível" (não envia sem anti-spam).
+
+Testar o email em local: copiar `.dev.vars.example` para `.dev.vars` (não vai para o Git), preencher `SMTP_PASS`
+e `ALLOW_NO_CAPTCHA=true`, `npm run cf:dev` e enviar o formulário em `http://localhost:8787/contactos/`.
+Se a Amen recusar o login vindo da Cloudflare, pedir-lhes que permitam SMTP autenticado a partir de IPs externos.
 
 ## Migração para ssenergy.pt
 
-1. **Cloudflare → Add a domain** `ssenergy.pt` (plano Free) e rever os registos DNS importados. Têm de existir:
-   - `MX ssenergy.pt → mail-pt.securemail.pro` (prioridade 10)
-   - `TXT ssenergy.pt → "v=spf1 include:spf.webapps.net ~all"`
-   - quaisquer outros registos da Amen (webmail, autodiscover, DKIM…) — comparar com o painel da Amen
-   - **apagar** o `A ssenergy.pt → 81.88.52.249` e o `www` antigos (são o WordPress)
-   - **não** ativar o Email Routing (desviaria o email da Amen)
-2. **Amen → domínio → Nameservers**: trocar `ns1/ns2.amenworld.com` pelos dois nameservers indicados pela Cloudflare
-   (desativar DNSSEC antes, se estiver ativo). A propagação pode demorar algumas horas.
+O código já está preparado (domínio canónico, `www` → raiz, sitemap, canonical, HSTS). Só falta o DNS:
+
+1. **Cloudflare → Add a domain** → `ssenergy.pt` (plano Free). Confirmar que ficam estes registos (são o email da Amen):
+
+   | Tipo | Nome | Conteúdo |
+   |---|---|---|
+   | MX | `ssenergy.pt` | `mail-pt.securemail.pro` (prioridade 10) |
+   | TXT | `ssenergy.pt` | `v=spf1 include:spf.webapps.net ~all` |
+   | CNAME | `mail` | `mail-pt.securemail.pro` |
+   | CNAME | `smtp` | `smtp-pt.securemail.pro` |
+   | CNAME | `webmail` | `webmail-pt.setupdns.net` |
+   | CNAME | `autoconfig` | `tb-pt.securemail.pro` |
+   | TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:geral@ssenergy.pt` (novo, recomendado) |
+
+   Todos os registos de email em **DNS only** (nuvem cinzenta). **Apagar** `A ssenergy.pt → 81.88.52.249`, `www` e `ftp`
+   (eram o WordPress). **Não** ativar o Email Routing.
+2. **Amen → domínio → Nameservers**: trocar `ns1/ns2.amenworld.com` pelos dois indicados pela Cloudflare. Propagação: algumas horas.
 3. **Worker `ssenergy` → Settings → Domains & Routes → Add → Custom domain**: `ssenergy.pt` e `www.ssenergy.pt`
-   (o certificado SSL é criado automaticamente).
-4. **Redirecionar `www` → raiz**: Rules → Redirect Rules → *Redirect from WWW to root* (301, manter caminho e query).
-5. Em `wrangler.jsonc`, mudar `"workers_dev": false` (o endereço `*.workers.dev` deixa de responder e não duplica o site no Google).
-6. `node scripts/verificar-redirects.mjs https://ssenergy.pt` e um envio real do formulário.
-7. Google Search Console: submeter `https://ssenergy.pt/sitemap-index.xml` e inspecionar a home e 2–3 projetos.
-8. Validar dados estruturados em <https://search.google.com/test/rich-results>.
-9. Atualizar o link do site no Google Business Profile, Facebook e Instagram.
-10. Acompanhar erros 404 no Search Console durante 4 semanas e acrescentar redirects se necessário.
+   (SSL automático; o redirect `www` → raiz já é feito pelo Worker).
+4. Verificar: `node scripts/verificar-redirects.mjs https://ssenergy.pt`, `curl -I http://www.ssenergy.pt` (301 → `https://ssenergy.pt/`)
+   e um envio real do formulário.
+5. Google Search Console: adicionar a propriedade, submeter `https://ssenergy.pt/sitemap-index.xml` e inspecionar a home e 2–3 projetos.
+6. Validar dados estruturados em <https://search.google.com/test/rich-results>.
+7. Atualizar o link do site no Google Business Profile, Facebook e Instagram.
+8. Acompanhar erros 404 no Search Console durante 4 semanas e acrescentar redirects em `public/_redirects` se necessário.
 
 ## Pendente (dados da empresa)
 
-- `src/data/site.json`: **morada** (e **email** público, se for `geral@ssenergy.pt`) (usados no schema LocalBusiness e no rodapé).
 - `src/content/paginas/politica-de-privacidade.md`: validar juridicamente (NIF, morada, responsável).
 - Projetos de carregadores VE: indicar a **localidade/distrito** (o WordPress não tinha esta informação).
 - Projeto “Aveleda”: confirmar o concelho/distrito.
-- DNS (Amen): acrescentar um registo DMARC, ex.: `_dmarc.ssenergy.pt TXT "v=DMARC1; p=none; rua=mailto:geral@ssenergy.pt"`.

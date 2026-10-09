@@ -4,15 +4,18 @@
   "name": "ssenergy",
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
+  // O `wrangler deploy` (local ou no Cloudflare) gera o site antes de publicar — não é preciso "Build command" no painel
+  "build": { "command": "npm run build", "watch_dir": "src" },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash",
-    // Só o formulário passa pelo Worker; tudo o resto é servido como ficheiro estático
-    "run_worker_first": ["/api/*"]
+    // Páginas e /api passam pelo Worker (www → raiz, noindex em workers.dev, formulário);
+    // imagens, CSS, JS e fontes (/_astro/*) são servidos diretamente, sem custo de Worker
+    "run_worker_first": ["/*", "!/_astro/*"]
   },
-  // Variáveis não secretas (versionadas). Segredos — SMTP_PASS e TURNSTILE_SECRET — no painel ou com `wrangler secret put`.
+  // Variáveis não secretas (versionadas). Segredos — SMTP_PASS e TURNSTILE_SECRET — no painel do Worker.
   "vars": {
     "SMTP_HOST": "smtp-pt.securemail.pro",
     "SMTP_PORT": "465",
@@ -20,7 +23,7 @@
     "CONTACT_TO": "geral@ssenergy.pt",
     "CONTACT_FROM_NAME": "Site SS Energy"
   },
-  // true enquanto o domínio ssenergy.pt não estiver ligado; depois mudar para false
+  // O endereço *.workers.dev continua ativo para testes, mas com noindex (ver worker/index.ts)
   "workers_dev": true,
   "preview_urls": false,
   "observability": { "enabled": true }

@@ -2,6 +2,7 @@
 // Formulário de orçamento. Funciona sem JS (POST → /obrigado/); com JS envia por fetch.
 // Campos específicos de painéis solares / carregadores aparecem via CSS :has() conforme o serviço escolhido.
 import Icon from './Icon.astro';
+import { site } from '../lib/site';
 
 interface Props {
   servico?: string;
@@ -10,7 +11,8 @@ interface Props {
 }
 
 const { servico = '', titulo = 'Peça o seu orçamento gratuito', id = 'orcamento' } = Astro.props;
-const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+// Chave pública do Turnstile (não é secreta): src/data/site.json → turnstileSiteKey
+const siteKey = site.turnstileSiteKey || import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 
 const SERVICOS = [
   ['paineis-solares', 'Painéis solares'],
