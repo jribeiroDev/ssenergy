@@ -1,11 +1,11 @@
-// Cloudflare Pages Function — POST /api/contacto/
-// Valida o pedido de orçamento, verifica o Turnstile e envia email pelo SMTP do domínio (Amen).
-// Variáveis (painel Cloudflare → Settings → Variables and Secrets, ou .dev.vars em local):
+// POST /api/contacto — valida o pedido de orçamento, verifica o Turnstile e envia email pelo SMTP do domínio (Amen).
+// Variáveis: não secretas em wrangler.jsonc ("vars"); segredos com `wrangler secret put` ou no painel
+// (Worker → Settings → Variables and Secrets); em local, no ficheiro .dev.vars.
 //   TURNSTILE_SECRET, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS,
 //   CONTACT_TO (por defeito geral@ssenergy.pt), CONTACT_FROM_NAME, ALLOW_NO_CAPTCHA (só dev)
-import { enviarEmail } from "../_lib/smtp";
+import { enviarEmail } from "./smtp";
 
-interface Env {
+export interface Env {
   TURNSTILE_SECRET?: string;
   SMTP_HOST?: string;
   SMTP_PORT?: string;
@@ -17,11 +17,6 @@ interface Env {
 }
 
 const CONTACT_TO_PADRAO = "geral@ssenergy.pt";
-
-interface Ctx {
-  request: Request;
-  env: Env;
-}
 
 const SERVICOS: Record<string, string> = {
   "paineis-solares": "Painéis solares",
@@ -92,7 +87,7 @@ async function verificarTurnstile(
   return data.success;
 }
 
-export async function onRequestPost({ request, env }: Ctx): Promise<Response> {
+export async function contacto(request: Request, env: Env): Promise<Response> {
   let form: FormData;
   try {
     form = await request.formData();

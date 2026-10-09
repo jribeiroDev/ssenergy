@@ -1,10 +1,6 @@
-
-TURNSTILE_SECRET=
-SMTP_HOST=
-SMTP_PORT=
-SMTP_USER=
+# Copiar para .dev.vars (não vai para o Git) para testar o formulário com `npm run cf:dev`.
+# SMTP_HOST/PORT/USER e CONTACT_TO já vêm de wrangler.jsonc ("vars"); aqui só os segredos (ou valores a substituir).
 SMTP_PASS=
-CONTACT_TO=
-CONTACT_FROM_NAME=
+TURNSTILE_SECRET=
 # Só em desenvolvimento: aceitar pedidos sem Turnstile
 ALLOW_NO_CAPTCHA=false

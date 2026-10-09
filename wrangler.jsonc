@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Tem de coincidir com o nome do Worker no Cloudflare (ssenergy.jrapp.workers.dev)
+  "name": "ssenergy",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+    // Só o formulário passa pelo Worker; tudo o resto é servido como ficheiro estático
+    "run_worker_first": ["/api/*"]
+  },
+  // Variáveis não secretas (versionadas). Segredos — SMTP_PASS e TURNSTILE_SECRET — no painel ou com `wrangler secret put`.
+  "vars": {
+    "SMTP_HOST": "smtp-pt.securemail.pro",
+    "SMTP_PORT": "465",
+    "SMTP_USER": "geral@ssenergy.pt",
+    "CONTACT_TO": "geral@ssenergy.pt",
+    "CONTACT_FROM_NAME": "Site SS Energy"
+  },
+  // true enquanto o domínio ssenergy.pt não estiver ligado; depois mudar para false
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true }
+}

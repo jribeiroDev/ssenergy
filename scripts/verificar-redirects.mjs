@@ -1,8 +1,8 @@
 // Verifica que todos os URLs do site WordPress antigo respondem 200 (ou 301 → 200) no site novo.
-// Uso: node scripts/verificar-redirects.mjs [base]   (por defeito http://127.0.0.1:8788 — `npm run cf:dev`)
+// Uso: node scripts/verificar-redirects.mjs [base]   (por defeito http://127.0.0.1:8787 — `npm run cf:dev`)
 // Usar antes e depois de mudar o DNS (ex.: node scripts/verificar-redirects.mjs https://ssenergy.pt)
 
-const BASE = process.argv[2] ?? 'http://127.0.0.1:8788';
+const BASE = process.argv[2] ?? 'http://127.0.0.1:8787';
 
 // URLs do WordPress (sitemap Yoast + projetos, que não estavam no sitemap antigo)
 const ANTIGOS = [

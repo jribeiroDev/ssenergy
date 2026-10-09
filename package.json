@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "migrate:wp": "node scripts/migrate-wp.mjs",
-    "cf:dev": "wrangler pages dev dist"
+    "cf:dev": "wrangler dev",
+    "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
