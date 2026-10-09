@@ -10,6 +10,7 @@ import { projetosOrdenados, servicosOrdenados } from '../lib/conteudo';
 import hero from '../assets/site/hero.jpg';
 
 const servicos = await servicosOrdenados();
+// Cards principais: imagem e texto empilhados em grid (sem position) para o link (after:inset-0) cobrir o card todo
 const principais = servicos.filter((s) => s.data.destaqueInicio && s.data.imagem);
 const outros = servicos.filter((s) => !principais.includes(s));
 const projetos = await projetosOrdenados(true);
@@ -107,16 +108,16 @@ const ICONES_PORQUE = {
       <div class="mt-10 grid gap-6 lg:grid-cols-3">
         {
           principais.map((s) => (
-            <article class="group relative overflow-hidden rounded-3xl bg-navy-950">
+            <article class="group relative grid overflow-hidden rounded-3xl bg-navy-950">
               <Image
                 src={s.data.imagem!}
                 alt={s.data.imagemAlt ?? ''}
                 widths={[360, 540, 720]}
                 sizes="(min-width: 1024px) 400px, 100vw"
-                class="aspect-[4/5] w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-60"
+                class="col-start-1 row-start-1 aspect-[4/5] w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-60"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/40 to-transparent" />
-              <div class="absolute items-center flex gap-3 bottom-0 p-6 text-white">
+              <div class="z-10 col-start-1 row-start-1 flex items-center gap-3 self-end p-6 text-white">
                 <Icon nome={s.data.icone} class="size-8 text-laranja-500" />
                 <h3 class=" text-2xl text-white">
                   <a href={`/servicos/${s.id}/`} class="after:absolute after:inset-0">
