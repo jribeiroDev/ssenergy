@@ -27,10 +27,6 @@ const projetos = d.categoriaProjetos
   : [];
 const outros = (await servicosOrdenados()).filter((s) => s.id !== servico.id).slice(0, 3);
 const url = `/servicos/${servico.id}/`;
-const trilho = [
-  { nome: 'Serviços', url: '/servicos/' },
-  { nome: d.tituloCurto, url },
-];
 ---
 
 <BaseLayout
@@ -38,10 +34,9 @@ const trilho = [
   descricao={d.seo?.descricao ?? d.resumo}
   imagem={d.imagem}
   imagemAlt={d.imagemAlt}
-  trilho={trilho}
   schema={[servicoLd({ nome: d.titulo, descricao: d.resumo, url }), ...(d.faq.length ? [faqPage(d.faq)] : [])]}
 >
-  <CabecalhoPagina titulo={d.titulo} subtitulo={d.resumo} eyebrow="Serviço" trilho={trilho}>
+  <CabecalhoPagina titulo={d.titulo} subtitulo={d.resumo} eyebrow="Serviço">
     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
       <a href="#orcamento" class="btn-primario px-7 py-4 text-base">Pedir orçamento gratuito <Icon nome="seta" class="size-5" /></a>
     </div>

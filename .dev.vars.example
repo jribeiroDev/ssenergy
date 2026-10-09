@@ -1,7 +1,10 @@
-# Segredos da Function /api/contacto (copiar para .dev.vars em local; definir no painel Cloudflare em produção)
+
 TURNSTILE_SECRET=
-RESEND_API_KEY=
-CONTACT_TO=geral@ssenergy.pt
-CONTACT_FROM=SS Energy <site@ssenergy.pt>
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+CONTACT_TO=
+CONTACT_FROM_NAME=
 # Só em desenvolvimento: aceitar pedidos sem Turnstile
 ALLOW_NO_CAPTCHA=false

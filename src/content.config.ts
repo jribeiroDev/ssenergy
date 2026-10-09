@@ -51,35 +51,6 @@ const servicos = defineCollection({
     }),
 });
 
-const zonas = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/zonas' }),
-  schema: z.object({
-    nome: z.string(),
-    distrito: z.string(),
-    concelhos: z.array(z.string()).default([]),
-    titulo: z.string(),
-    resumo: z.string(),
-    seo,
-  }),
-});
-
-const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
-  schema: ({ image }) =>
-    z.object({
-      titulo: z.string(),
-      data: z.coerce.date(),
-      atualizado: z.coerce.date().optional(),
-      resumo: z.string(),
-      capa: image().optional(),
-      capaAlt: z.string().optional(),
-      autor: z.string().default('SS Energy'),
-      etiquetas: z.array(z.string()).default([]),
-      rascunho: z.boolean().default(false),
-      seo,
-    }),
-});
-
 const paginas = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/paginas' }),
   schema: z.object({
@@ -91,4 +62,4 @@ const paginas = defineCollection({
   }),
 });
 
-export const collections = { projetos, servicos, zonas, blog, paginas };
+export const collections = { projetos, servicos, paginas };

@@ -5,18 +5,16 @@ import FormularioOrcamento from '../components/FormularioOrcamento.astro';
 import Icon from '../components/Icon.astro';
 import { site, telUrl, whatsappUrl } from '../lib/site';
 
-const trilho = [{ nome: 'Contactos', url: '/contactos/' }];
 ---
 
 <BaseLayout
   titulo="Contactos e pedido de orçamento"
   descricao={`Peça o seu orçamento gratuito para painéis solares, carregadores de carros elétricos ou instalações elétricas. Ligue ${site.telefoneVisivel} ou fale connosco no WhatsApp.`}
-  trilho={trilho}
 >
   <CabecalhoPagina
     titulo="Contacte-nos"
     subtitulo="Preencha o formulário e entraremos em contacto consigo o mais rapidamente possível."
-    trilho={trilho}
+    
   />
   <section class="py-16">
     <div class="container-site grid gap-12 lg:grid-cols-5">
@@ -29,13 +27,13 @@ const trilho = [{ nome: 'Contactos', url: '/contactos/' }];
             <span class="block text-xs text-cinza-600">{site.notaTelefone}</span>
           </span>
         </a>
-        <a href={whatsappUrl()} rel="noopener" target="_blank" class="flex items-start gap-4 rounded-2xl bg-cinza-50 p-6 hover:bg-cinza-100">
+        <!-- <a href={whatsappUrl()} rel="noopener" target="_blank" class="flex items-start gap-4 rounded-2xl bg-cinza-50 p-6 hover:bg-cinza-100">
           <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-navy-950 text-laranja-500"><Icon nome="whatsapp" /></span>
           <span>
             <span class="block text-sm text-cinza-600">WhatsApp</span>
             <span class="block text-xl font-semibold text-navy-950">Enviar mensagem</span>
           </span>
-        </a>
+        </a> -->
         {
           site.email && (
             <a href={`mailto:${site.email}`} class="flex items-start gap-4 rounded-2xl bg-cinza-50 p-6 hover:bg-cinza-100">
@@ -54,13 +52,13 @@ const trilho = [{ nome: 'Contactos', url: '/contactos/' }];
             <span class="block font-semibold text-navy-950">{site.horario}</span>
           </span>
         </div>
-        <div class="flex items-start gap-4 rounded-2xl bg-cinza-50 p-6">
+        <!-- <div class="flex items-start gap-4 rounded-2xl bg-cinza-50 p-6">
           <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-navy-950 text-laranja-500"><Icon nome="mapa" /></span>
           <span>
             <span class="block text-sm text-cinza-600">Área de atuação</span>
             <span class="block font-semibold text-navy-950">{site.areaServida.join(', ')}</span>
           </span>
-        </div>
+        </div> -->
       </aside>
       <div class="lg:col-span-3">
         <FormularioOrcamento titulo="Escolha o serviço que pretende" />

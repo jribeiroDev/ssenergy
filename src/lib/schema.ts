@@ -51,18 +51,6 @@ export function website() {
   };
 }
 
-export function breadcrumbs(itens: { nome: string; url: string }[]) {
-  return {
-    '@type': 'BreadcrumbList',
-    itemListElement: itens.map((it, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: it.nome,
-      item: absoluteUrl(it.url),
-    })),
-  };
-}
-
 export function faqPage(faq: { pergunta: string; resposta: string }[]) {
   return {
     '@type': 'FAQPage',

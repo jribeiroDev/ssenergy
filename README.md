@@ -1,10 +1,10 @@
 # SS Energy — site
 
-Site estático da [SS Energy](https://ssenergy.pt) feito com **Astro**, **Tailwind CSS v4** e **Sveltia CMS**, alojado no **Cloudflare Pages**.
+Site estático da [SS Energy](https://ssenergy.pt) feito com **Astro** e **Tailwind CSS v4**, alojado no **Cloudflare Pages**.
 
 - Zero frameworks de UI e ~2 KB de JavaScript (prefetch, formulário e lightbox)
 - Imagens otimizadas no build (AVIF/WebP, `srcset`), fontes Poppins servidas do próprio domínio
-- SEO: sitemap, canonical, Open Graph, JSON-LD (`Electrician`, `Service`, `FAQPage`, `BreadcrumbList`, `BlogPosting`), páginas por serviço e por zona
+- SEO: sitemap, canonical, Open Graph, JSON-LD (`Electrician`, `Service`, `FAQPage`), páginas por serviço
 - URLs do WordPress mantidos (`/sobre-nos/`, `/project/<slug>/`) + redirects 301 em [`public/_redirects`](public/_redirects)
 
 ## Comandos
@@ -12,7 +12,7 @@ Site estático da [SS Energy](https://ssenergy.pt) feito com **Astro**, **Tailwi
 | Comando | O que faz |
 |---|---|
 | `npm install` | Instala dependências (Node ≥ 22.19 recomendado para o Wrangler) |
-| `npm run dev` | Servidor de desenvolvimento em `localhost:4321` (mostra rascunhos do blog) |
+| `npm run dev` | Servidor de desenvolvimento em `localhost:4321` |
 | `npm run build` | Gera o site em `dist/` |
 | `npm run preview` | Serve o `dist/` |
 | `npm run cf:dev` | Serve o `dist/` com Wrangler: `_redirects`, `_headers` e a Function do formulário |
@@ -24,36 +24,64 @@ Site estático da [SS Energy](https://ssenergy.pt) feito com **Astro**, **Tailwi
 
 ```
 src/
-  content/            Conteúdo editável (Markdown) — projetos, servicos, zonas, blog, paginas
+  content/            Conteúdo editável (Markdown) — projetos, servicos, paginas
   content.config.ts   Schemas (o build falha se o conteúdo for inválido)
   data/               site.json (contactos, horário, redes) e inicio.json (textos da home)
   assets/             Imagens (otimizadas no build)
   components/ layouts/ pages/ lib/
 public/
-  admin/              Sveltia CMS (/admin/) e config.yml
   _headers _redirects robots.txt
-functions/api/contacto.ts   Function do formulário (Turnstile + Resend)
+functions/api/contacto.ts   Function do formulário (Turnstile + envio por SMTP)
+  _lib/smtp.ts              Cliente SMTP (sockets TCP do Cloudflare, sem dependências)
 ```
 
-## Gestão de conteúdos (CMS)
+## Adicionar conteúdo
 
-O painel fica em **`https://ssenergy.pt/admin/`**. Cada gravação faz um commit no GitHub e o Cloudflare publica o site em ~1–2 min.
+O conteúdo é Markdown no repositório. Cada push para `main` publica o site no Cloudflare (~1–2 min).
+Corra `npm run build` antes do push: se um ficheiro tiver um campo em falta ou errado, o build falha e indica qual
+(schemas em [`src/content.config.ts`](src/content.config.ts)).
 
-Coleções: **Projetos**, **Blog**, **Serviços**, **Zonas**, **Páginas** e **Definições** (contactos e textos da página inicial).
+### Novo projeto → `/project/<nome-do-ficheiro>/`
 
-Dicas para quem edita:
-- Preencha sempre a **descrição da imagem (alt)** e o **distrito** dos projetos (liga-os automaticamente às páginas de zona).
-- Artigos novos nascem como **rascunho** — desmarque para publicar.
-- Os textos das zonas devem ser únicos (não copiar entre zonas).
+1. Copiar as fotografias para `src/assets/projetos/` (JPG até ~1920 px; nome sem espaços nem acentos, ex.: `braga-2026-01.jpg`).
+2. Criar `src/content/projetos/<slug>.md` — o nome do ficheiro é o URL:
 
-### Configuração inicial do CMS (uma vez)
+```md
+---
+titulo: "Painéis solares em Braga – 3,6 kWp"
+data: 2026-10-15
+categoria: paineis-solares          # paineis-solares | carregadores-ve | instalacoes-eletricas | baterias
+localidade: "Lamaçães"
+concelho: "Braga"
+distrito: "Braga"
+potencia: "3,6 kWp"
+equipamentos:
+  - "6 Painéis Aiko 605W"
+  - "1 Inversor Growatt 3.6kW"
+capa: ../../assets/projetos/braga-2026-01.jpg
+capaAlt: "Painéis solares no telhado de uma moradia em Lamaçães, Braga"
+galeria:                            # opcional
+  - imagem: ../../assets/projetos/braga-2026-02.jpg
+    alt: "Inversor Growatt instalado na garagem"
+destaque: false                     # true = aparece primeiro na página inicial
+---
 
-1. Criar o repositório no GitHub e fazer push deste projeto.
-2. Em `public/admin/config.yml`, substituir `repo: OWNER/ssenergy` pelo repositório real.
-3. Autenticação GitHub: publicar o Worker [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) no Cloudflare, criar uma *OAuth App* no GitHub com callback `https://<worker>/callback`, definir `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` e `ALLOWED_DOMAINS=ssenergy.pt` no Worker, e pôr o URL do Worker em `base_url`.
-4. Adicionar quem edita como colaborador do repositório GitHub.
+A SS Energy concluiu em Lamaçães (Braga) mais uma instalação com potência de 3,6 kWp.
+```
 
-> Para testar sem OAuth: abrir `/admin/` em `npm run dev` num browser Chromium e escolher **Work with Local Repository**.
+### Outros conteúdos
+
+| O quê | Onde | URL |
+|---|---|---|
+| Serviços (texto, vantagens, processo, FAQ) | `src/content/servicos/*.md` | `/servicos/<ficheiro>/` |
+| Páginas simples (Sobre nós, privacidade…) | `src/content/paginas/*.md` | `/<ficheiro>/` |
+| Contactos, horário, redes sociais | `src/data/site.json` | todo o site |
+| Textos da página inicial | `src/data/inicio.json` | `/` |
+
+Boas práticas:
+- Preencher sempre o **alt** das imagens e o **distrito** dos projetos.
+- Títulos descritivos e únicos (local + potência), nada de "Instalação de carregador" repetido.
+- Campo opcional `seo: { titulo, descricao }` em qualquer conteúdo para afinar o título/descrição no Google.
 
 ## Deploy no Cloudflare Pages
 
@@ -66,12 +94,16 @@ Dicas para quem edita:
    | `PUBLIC_TURNSTILE_SITE_KEY` | build | chave pública do Turnstile |
    | `PUBLIC_CF_ANALYTICS_TOKEN` | build (opcional) | token do Web Analytics |
    | `TURNSTILE_SECRET` | secret | chave secreta do Turnstile |
-   | `RESEND_API_KEY` | secret | chave da API Resend |
-   | `CONTACT_TO` | texto | email(s) que recebem os pedidos (separados por vírgula) |
-   | `CONTACT_FROM` | texto | ex.: `SS Energy <site@ssenergy.pt>` (domínio verificado no Resend) |
+   | `SMTP_HOST` | texto | `smtp-pt.securemail.pro` (email da Amen) |
+   | `SMTP_PORT` | texto | `465` (SSL/TLS) ou `587` (STARTTLS) |
+   | `SMTP_USER` | texto | caixa que envia, ex.: `geral@ssenergy.pt` (é também o remetente) |
+   | `SMTP_PASS` | secret | password dessa caixa |
+   | `CONTACT_TO` | texto (opcional) | quem recebe os pedidos; por defeito `geral@ssenergy.pt` (vários separados por vírgula) |
+   | `CONTACT_FROM_NAME` | texto (opcional) | nome do remetente; por defeito `Site SS Energy` |
 
 4. **Turnstile**: criar um widget para `ssenergy.pt` (modo *managed*).
-5. **Resend**: adicionar o domínio `ssenergy.pt` e criar os registos DNS (SPF/DKIM) indicados.
+5. **Email**: em local, copiar `.dev.vars.example` para `.dev.vars` (não vai para o Git), preencher `SMTP_PASS` e testar com `npm run cf:dev`.
+   Se a Amen bloquear o login vindo da Cloudflare, pedir-lhes para permitir SMTP autenticado a partir de IPs externos.
 6. Testar em `*.pages.dev`, correr `node scripts/verificar-redirects.mjs https://<projeto>.pages.dev`.
 
 ## Go-live
@@ -85,7 +117,9 @@ Dicas para quem edita:
 
 ## Pendente (dados da empresa)
 
-- `src/data/site.json`: **email** e **morada** (usados no schema LocalBusiness e no rodapé).
+- `src/data/site.json`: **morada** (e **email** público, se for `geral@ssenergy.pt`) (usados no schema LocalBusiness e no rodapé).
 - `src/content/paginas/politica-de-privacidade.md`: validar juridicamente (NIF, morada, responsável).
 - Projetos de carregadores VE: indicar a **localidade/distrito** (o WordPress não tinha esta informação).
 - Projeto “Aveleda”: confirmar o concelho/distrito.
+- DNS (Amen): acrescentar um registo DMARC, ex.: `_dmarc.ssenergy.pt TXT "v=DMARC1; p=none; rua=mailto:geral@ssenergy.pt"`.
+- O domínio raiz `ssenergy.pt` no Cloudflare Pages exige mudar os nameservers da Amen para a Cloudflare (copiar MX/SPF; o email continua na Amen).

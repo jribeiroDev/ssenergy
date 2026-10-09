@@ -1,6 +1,5 @@
 ---
 import { Image, Picture } from 'astro:assets';
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 import ProjetoCard from '../components/ProjetoCard.astro';
@@ -14,7 +13,6 @@ const servicos = await servicosOrdenados();
 const principais = servicos.filter((s) => s.data.destaqueInicio && s.data.imagem);
 const outros = servicos.filter((s) => !principais.includes(s));
 const projetos = await projetosOrdenados(true);
-const zonas = await getCollection('zonas');
 
 const ICONES_PORQUE = {
   equipa: 'equipa',
@@ -118,14 +116,13 @@ const ICONES_PORQUE = {
                 class="aspect-[4/5] w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-60"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/40 to-transparent" />
-              <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+              <div class="absolute items-center flex gap-3 bottom-0 p-6 text-white">
                 <Icon nome={s.data.icone} class="size-8 text-laranja-500" />
-                <h3 class="mt-3 text-2xl text-white">
+                <h3 class=" text-2xl text-white">
                   <a href={`/servicos/${s.id}/`} class="after:absolute after:inset-0">
                     {s.data.tituloCurto}
                   </a>
                 </h3>
-                <p class="mt-2 text-sm text-white/80">{s.data.resumo}</p>
               </div>
             </article>
           ))
@@ -150,21 +147,6 @@ const ICONES_PORQUE = {
       <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {projetos.slice(0, 6).map((p) => <ProjetoCard projeto={p} />)}
       </div>
-      {
-        zonas.length > 0 && (
-          <p class="mt-10 text-center text-sm text-cinza-600">
-            Trabalhamos em todo o Norte e Centro, sobretudo nos distritos de{' '}
-            {zonas.map((z, i) => (
-              <>
-                <a href={`/zonas/${z.id}/`} class="font-semibold text-navy-950 underline underline-offset-2 hover:text-laranja-700">
-                  {z.data.nome}
-                </a>
-                {i < zonas.length - 2 ? ', ' : i === zonas.length - 2 ? ' e ' : '.'}
-              </>
-            ))}
-          </p>
-        )
-      }
     </div>
   </section>
 
@@ -183,9 +165,13 @@ const ICONES_PORQUE = {
             </a>
           </li>
           <li>
-            <a href={whatsappUrl()} rel="noopener" target="_blank" class="flex items-center gap-4 text-lg font-semibold hover:text-laranja-400">
+            <!-- <a href={whatsappUrl()} rel="noopener" target="_blank" class="flex items-center gap-4 text-lg font-semibold hover:text-laranja-400">
               <span class="flex size-11 items-center justify-center rounded-xl bg-white/10 text-laranja-500"><Icon nome="whatsapp" class="size-5" /></span>
               WhatsApp
+            </a> -->
+             <a href={`mailto:${site.email}`} class="flex items-center gap-4 text-lg font-semibold hover:text-laranja-400">
+              <span class="flex size-11 items-center justify-center rounded-xl bg-white/10 text-laranja-500"><Icon nome="email" /></span>
+                <span>{site.email}</span>
             </a>
           </li>
           <li class="flex items-center gap-4 text-white/80">

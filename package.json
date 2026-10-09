@@ -12,7 +12,6 @@
     "cf:dev": "wrangler pages dev dist"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource/poppins": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",

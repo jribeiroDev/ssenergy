@@ -1,10 +1,4 @@
-import { getCollection, type CollectionEntry } from 'astro:content';
-
-/** Artigos publicados (rascunhos só aparecem em `astro dev`). */
-export async function artigosPublicados() {
-  const todos = await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.rascunho);
-  return todos.sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
-}
+import { getCollection } from 'astro:content';
 
 /** Projetos do mais recente para o mais antigo; destaques primeiro se pedido. */
 export async function projetosOrdenados(destaquesPrimeiro = false) {
@@ -18,6 +12,3 @@ export async function projetosOrdenados(destaquesPrimeiro = false) {
 export async function servicosOrdenados() {
   return (await getCollection('servicos')).sort((a, b) => a.data.ordem - b.data.ordem);
 }
-
-export const tituloSeo = (e: CollectionEntry<'servicos' | 'blog' | 'paginas' | 'projetos'>) =>
-  e.data.seo?.titulo ?? e.data.titulo;

@@ -42,15 +42,10 @@ const descricao =
     .filter(Boolean)
     .join(' ')
     .slice(0, 160);
-const trilho = [
-  { nome: 'Projetos', url: '/projetos/' },
-  { nome: CATEGORIA_LABEL[d.categoria], url: `/projetos/${d.categoria}/` },
-  { nome: d.localidade ?? d.titulo, url: `/project/${projeto.id}/` },
-];
 ---
 
-<BaseLayout titulo={d.seo?.titulo ?? d.titulo} descricao={descricao} imagem={d.capa} imagemAlt={d.capaAlt} trilho={trilho}>
-  <CabecalhoPagina titulo={d.titulo} eyebrow={CATEGORIA_LABEL[d.categoria]} trilho={trilho} />
+<BaseLayout titulo={d.seo?.titulo ?? d.titulo} descricao={descricao} imagem={d.capa} imagemAlt={d.capaAlt}>
+  <CabecalhoPagina titulo={d.titulo} eyebrow={CATEGORIA_LABEL[d.categoria]} />
 
   <section class="py-12 sm:py-16">
     <div class="container-site grid gap-10 lg:grid-cols-5">

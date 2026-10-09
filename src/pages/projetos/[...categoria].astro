@@ -26,15 +26,11 @@ const label = categoria ? CATEGORIA_LABEL[categoria] : undefined;
 const titulo = label ? `Projetos de ${label.toLowerCase()}` : 'Projetos e instalações';
 const descricao = label
   ? `${projetos.length} instalações de ${label.toLowerCase()} realizadas pela SS Energy no Norte e Centro de Portugal. Veja potências, equipamentos e fotografias.`
-  : `Veja ${projetos.length} instalações de painéis solares e carregadores para carros elétricos realizadas pela SS Energy em Braga, Porto, Aveiro e outras zonas.`;
-const trilho = [
-  { nome: 'Projetos', url: '/projetos/' },
-  ...(categoria ? [{ nome: label!, url: `/projetos/${categoria}/` }] : []),
-];
+  : `Veja ${projetos.length} instalações de painéis solares e carregadores para carros elétricos realizadas pela SS Energy em Braga, Porto, Aveiro e outros distritos.`;
 ---
 
-<BaseLayout titulo={titulo} descricao={descricao} trilho={trilho}>
-  <CabecalhoPagina titulo={titulo} subtitulo="Algumas das obras que concluímos para os nossos clientes." trilho={trilho} />
+<BaseLayout titulo={titulo} descricao={descricao}>
+  <CabecalhoPagina titulo={titulo} subtitulo="Algumas das obras que concluímos para os nossos clientes." />
 
   <section class="py-12 sm:py-16">
     <div class="container-site">

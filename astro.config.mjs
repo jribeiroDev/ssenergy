@@ -4,15 +4,14 @@ import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
-// Páginas fora do sitemap: utilitárias + conteúdos marcados noindex/rascunho no CMS.
+// Páginas fora do sitemap: utilitárias + páginas com noindex: true no frontmatter.
+/** @param {string} dir @param {RegExp} re */
 const comFrontmatter = (dir, re) =>
   fs
     .readdirSync(dir)
     .filter((f) => f.endsWith('.md') && re.test(fs.readFileSync(`${dir}/${f}`, 'utf8').split('---')[1] ?? ''));
 const paginasNoindex = comFrontmatter('./src/content/paginas', /^noindex:\s*true/m).map((f) => `/${f.slice(0, -3)}/`);
-const totalArtigos = fs.readdirSync('./src/content/blog').filter((f) => f.endsWith('.md')).length;
-const blogVazio = totalArtigos === comFrontmatter('./src/content/blog', /^rascunho:\s*true/m).length;
-const EXCLUIR_SITEMAP = ['/obrigado/', ...paginasNoindex, ...(blogVazio ? ['/blog/'] : [])];
+const EXCLUIR_SITEMAP = ['/obrigado/', ...paginasNoindex];
 
 export default defineConfig({
   site: 'https://ssenergy.pt',
@@ -38,11 +37,11 @@ export default defineConfig({
       cssVariable: '--font-poppins',
       fallbacks: ['sans-serif'],
       options: {
-        variants: [400, 600, 700].map((weight) => ({
-          src: [`@fontsource/poppins/files/poppins-latin-${weight}-normal.woff2`],
-          weight,
-          style: 'normal',
-        })),
+        variants: [
+          { src: ['@fontsource/poppins/files/poppins-latin-400-normal.woff2'], weight: 400, style: 'normal' },
+          { src: ['@fontsource/poppins/files/poppins-latin-600-normal.woff2'], weight: 600, style: 'normal' },
+          { src: ['@fontsource/poppins/files/poppins-latin-700-normal.woff2'], weight: 700, style: 'normal' },
+        ],
       },
     },
   ],

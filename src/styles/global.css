@@ -74,7 +74,7 @@
     @apply mt-2 text-3xl sm:text-4xl;
   }
 
-  /* Conteúdo Markdown (serviços, blog, páginas) */
+  /* Conteúdo Markdown (serviços, projetos, páginas) */
   .prosa {
     @apply max-w-none leading-relaxed text-cinza-800;
   }

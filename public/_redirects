@@ -25,5 +25,5 @@
 /project/                            /projetos/                                 301
 
 # Feeds
-/feed/                               /rss.xml                                   301
-/feed                                /rss.xml                                   301
+/feed/                               /                                   301
+/feed                                /                                   301

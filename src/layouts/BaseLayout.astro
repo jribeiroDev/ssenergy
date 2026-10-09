@@ -6,7 +6,7 @@ import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ContactoFlutuante from '../components/ContactoFlutuante.astro';
-import { breadcrumbs as breadcrumbsLd, grafo, negocioLocal, website } from '../lib/schema';
+import { grafo, negocioLocal, website } from '../lib/schema';
 
 interface Props {
   titulo: string;
@@ -17,17 +17,14 @@ interface Props {
   noindex?: boolean;
   publicado?: Date;
   atualizado?: Date;
-  /** Trilho de navegação (sem a página inicial) — gera BreadcrumbList */
-  trilho?: { nome: string; url: string }[];
   /** Nós JSON-LD adicionais específicos da página */
   schema?: object[];
 }
 
-const { trilho, schema = [], ...seo } = Astro.props;
+const { schema = [], ...seo } = Astro.props;
 const jsonLd = grafo(
   negocioLocal(),
   website(),
-  ...(trilho?.length ? [breadcrumbsLd([{ nome: 'Início', url: '/' }, ...trilho])] : []),
   ...schema,
 );
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
@@ -44,7 +41,6 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
     <link rel="icon" href="/favicon.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="alternate" type="application/rss+xml" title="Blog SS Energy" href="/rss.xml" />
     <Font cssVariable="--font-poppins" preload />
     <Seo {...seo} jsonLd={jsonLd} />
     <slot name="head" />
